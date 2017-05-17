@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "320359684909",
+    "firebase_url": "https://laitinena7-55fef.firebaseio.com",
+    "project_id": "laitinena7-55fef",
+    "storage_bucket": "laitinena7-55fef.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:320359684909:android:f14f2f3db611161d",
+        "android_client_info": {
+          "package_name": "sdccd.edu.laitinena7"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "320359684909-b37ognussck1hslhfhu7er5qqhgk0v02.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHnN1nS7a2x5K2WHzvRcNBcb1CkLBh_cY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
