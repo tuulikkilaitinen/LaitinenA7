@@ -31,10 +31,11 @@ public class MyBookRecyclerViewAdapter extends RecyclerView.Adapter<MyBookRecycl
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(mValues.get(position).getName());
-        holder.mContentView.setText(mValues.get(position).getPrice());
+        String price = "$" + mValues.get(position).getPrice();
+        holder.mContentView.setText(price);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -42,8 +43,10 @@ public class MyBookRecyclerViewAdapter extends RecyclerView.Adapter<MyBookRecycl
                 if (null != mListener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    //TODO
-                    //mListener.onListFragmentInteraction(new Book());
+                    //return message about book selected and return the book object.
+                    mListener.onListFragmentInteraction(
+                            MessageEnum.BOOK_SELECTED,
+                            MyBookRecyclerViewAdapter.this.mValues.get(position));
                 }
             }
         });
@@ -52,6 +55,13 @@ public class MyBookRecyclerViewAdapter extends RecyclerView.Adapter<MyBookRecycl
     @Override
     public int getItemCount() {
         return mValues.size();
+    }
+
+    public void setBooks(ArrayList<Book> books) {
+
+        mValues.clear();
+        mValues.addAll(books);
+        notifyDataSetChanged();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -67,9 +77,9 @@ public class MyBookRecyclerViewAdapter extends RecyclerView.Adapter<MyBookRecycl
             mContentView = (TextView) view.findViewById(R.id.content);
         }
 
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
-        }
+       //@Override
+        //public String toString() {
+            //return super.toString() + " '" + mContentView.getText() + "'";
+       // }//
     }
 }

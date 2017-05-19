@@ -20,6 +20,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
+
 public class AfterLoginActivity extends AppCompatActivity
     implements DatabaseHandlerListener, OnListFragmentInteractionListener {
 
@@ -36,6 +38,9 @@ public class AfterLoginActivity extends AppCompatActivity
     public static final String LOCATION = "location";
     private boolean preferencesChanged;
     private DatabaseHandler databaseHandler;
+    private BookFragment bookFragment;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +58,9 @@ public class AfterLoginActivity extends AppCompatActivity
         PreferenceManager.getDefaultSharedPreferences(this).
                 registerOnSharedPreferenceChangeListener(
                         preferencesChangeListener);
+
+        //getSupportFragmentManager().beginTransaction().add(R.id.fragment_book_list,
+                //new BookFragment(), "booklist").commit();
 
         //create user
         user = new User();
@@ -158,24 +166,32 @@ public class AfterLoginActivity extends AppCompatActivity
                 startMySettingsActivity();
             }
         } else if (message == MessageEnum.GET_BOOKS ) {
-            getBookFragment().setBooks();
+            getBookFragment().setBooks((ArrayList<Book>)result);
         }
 
 
     }
 
     @Override
-    public void onListFragmentInteraction(Book mItem) {
-        //TODO
+    public void onListFragmentInteraction(MessageEnum message, Book mItem) {
+
+        //open book view activity
     }
 
     // gets a reference to the BookFragment
     private BookFragment getBookFragment() {
 
-        return (BookFragment) getSupportFragmentManager().findFragmentById(
-                R.id.fragment_book_list);
+        BookFragment bookFragment = (BookFragment)
+                getSupportFragmentManager().findFragmentById(R.id.bookListFragment);
+
+        //return (BookFragment) getSupportFragmentManager().findFragmentById(
+               // R.id.fragment_book_list);
+        return bookFragment;
     }
 
+    private static String getFragmentName(int viewId, int id) {
+        return "android:switcher:" + viewId + ":" + id;
+    }
     //public Object getBookList() {
       //  return bookList;
     //}

@@ -9,5 +9,7 @@ public enum MessageEnum {
     FIND_USER,
     UPDATE_USER_NAME,
     UPDATE_USER_LOCATION,
-    UPDATE_USER_ID, GET_BOOKS
+    UPDATE_USER_ID,
+    GET_BOOKS,
+    BOOK_SELECTED
 }
