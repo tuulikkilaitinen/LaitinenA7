@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <sdccd.edu.laitinena7.FriendlyEditTextPreference android:title="Hidden Id"
+        android:key="userid"
+        android:summary="%s"
+        android:hint="This should be hidden"/>
+
+    <sdccd.edu.laitinena7.FriendlyEditTextPreference android:title="Your Name"
+        android:key="username"
+        android:summary="%s"
+        android:hint="Please provide your username"></sdccd.edu.laitinena7.FriendlyEditTextPreference>
+
+    <sdccd.edu.laitinena7.FriendlyEditTextPreference android:title="Your Location"
+        android:key="location"
+        android:summary="%s"
+        android:hint="Please provide your location"></sdccd.edu.laitinena7.FriendlyEditTextPreference>
+
+</PreferenceScreen>

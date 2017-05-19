@@ -2,7 +2,10 @@ package sdccd.edu.laitinena7;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.icu.text.BreakIterator;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.media.audiofx.BassBoost;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +15,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
+
 import android.view.View;
 import android.widget.TextView;
 
@@ -22,19 +26,21 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
-
 public class MainActivity extends AppCompatActivity
         implements GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
 
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
+
     private static final String TAG = "MainActivity";
     private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient mGoogleApiClient;
     private TextView mStatusTextView;
     private ProgressDialog mProgressDialog;
+
+    private String userId;
+    public static final String USER_ID = "edu.sdccd.laitinena7.USER_ID";
+    private boolean phoneDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +51,22 @@ public class MainActivity extends AppCompatActivity
         getSupportActionBar().setDisplayUseLogoEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.mipmap.ic_launcher);
+
+        // determine screen size
+        int screenSize = getResources().getConfiguration().screenLayout &
+                Configuration.SCREENLAYOUT_SIZE_MASK;
+
+        // if device is a tablet, set phoneDevice to false
+        if (screenSize == Configuration.SCREENLAYOUT_SIZE_LARGE ||
+                screenSize == Configuration.SCREENLAYOUT_SIZE_XLARGE) {
+
+            phoneDevice = false;
+        }
+
+        // if running on phone-sized device, allow only potrait orientation
+        if (phoneDevice == true) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
 
         // Views
         mStatusTextView = (TextView) findViewById(R.id.status);
@@ -130,10 +152,11 @@ public class MainActivity extends AppCompatActivity
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
             mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
-            updateUI(true);
+            this.userId = acct.getId();
+            updateUI(true, this.userId);
         } else {
             // Signed out, show unauthenticated UI.
-            updateUI(false);
+            updateUI(false, null);
         }
     }
     // [END handleSignInResult]
@@ -152,7 +175,7 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onResult(Status status) {
                         // [START_EXCLUDE]
-                        updateUI(false);
+                        updateUI(false, null);
                         // [END_EXCLUDE]
                     }
                 });
@@ -166,7 +189,7 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onResult(Status status) {
                         // [START_EXCLUDE]
-                        updateUI(false);
+                        updateUI(false, null);
                         // [END_EXCLUDE]
                     }
                 });
@@ -204,10 +227,17 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void updateUI(boolean signedIn) {
+    private void updateUI(boolean signedIn, String userId) {
         if (signedIn) {
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+
+            //start AfterLoginActivity
+            Intent intent = new Intent(this, AfterLoginActivity.class);
+            intent.putExtra(USER_ID, userId);
+            startActivity(intent);
+
+
         } else {
             mStatusTextView.setText(R.string.signed_out);
 
@@ -215,6 +245,8 @@ public class MainActivity extends AppCompatActivity
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
         }
     }
+
+
 
     @Override
     public void onClick(View v) {
