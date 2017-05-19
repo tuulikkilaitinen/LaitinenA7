@@ -8,6 +8,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+
 /**
  * Created by Tuulikki Laitinen on 5/18/2017.
  *
@@ -19,6 +21,7 @@ public class DatabaseHandler {
     private static final String TAG = "DatabaseHandler";
     private DatabaseHandlerListener listener;
     private User user;
+    private ArrayList<Book> books;
 
     public DatabaseHandler (DatabaseHandlerListener listener) {
         this.listener = listener;
@@ -43,9 +46,8 @@ public class DatabaseHandler {
                 //if user found
                 if (dataSnapshot.getChildrenCount() != 0) {
                     user = new User();
-
-                        user.setName((String) dataSnapshot.child("name").getValue());
-                        user.setLocation((String) dataSnapshot.child("location").getValue().toString());
+                    user.setName((String) dataSnapshot.child("name").getValue());
+                    user.setLocation((String) dataSnapshot.child("location").getValue().toString());
 
                     DatabaseHandler.this.sendMessage(MessageEnum.FIND_USER, user);
                 }
@@ -94,17 +96,74 @@ public class DatabaseHandler {
 
         //get always new reference to database in case connection
         //has changed
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("users");
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        //https://laitinena7-55fef.firebaseio.com/
+        DatabaseReference myRef = database.getReference().child("users").child(userId);
+
         if (message == MessageEnum.UPDATE_USER_ID) {
             myRef.setValue(userId);
         }
         else if (message == MessageEnum.UPDATE_USER_NAME) {
-            myRef.child(userId).child("name").setValue(userField);
+            myRef.child("name").setValue(userField);
         }
         else if (message == MessageEnum.UPDATE_USER_LOCATION) {
-            myRef.child(userId).child("location").setValue(userField);
+            myRef.child("location").setValue(userField);
         }
+
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.i(TAG, "updateUserData, onDataChange");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(TAG, databaseError.getMessage());
+            }
+        });
+    }
+
+    public void getBookList() {
+        //get always new reference to database in case connection
+        //has changed
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        //https://laitinena7-55fef.firebaseio.com/
+        DatabaseReference myRef = database.getReference().child("books");
+
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.i(TAG, "getBookList, onDataChange");
+                books = new ArrayList<Book>();
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    //fill up book list
+                    /*
+                    *
+                public Book (String id,
+                 String name,
+                 String author,
+                 String year,
+                 String price,
+                 String ownerId)
+                    * */
+                    books.add(new Book (ds.getKey().toString(),
+                            ds.child("name").getValue().toString(),
+                            ds.child("author").getValue().toString(),
+                            ds.child("year").getValue().toString(),
+                            ds.child("price").getValue().toString(),
+                            ds.child("ownerid").getValue().toString()
+                    ));
+
+                }
+
+                DatabaseHandler.this.sendMessage(MessageEnum.GET_BOOKS, books);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(TAG, databaseError.getMessage());
+            }
+        });
     }
 }
 

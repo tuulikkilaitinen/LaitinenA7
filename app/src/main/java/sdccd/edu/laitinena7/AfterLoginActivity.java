@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.support.v7.app.AppCompatActivity;
@@ -20,7 +21,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class AfterLoginActivity extends AppCompatActivity
-    implements DatabaseHandlerListener{
+    implements DatabaseHandlerListener, OnListFragmentInteractionListener {
 
     private boolean isUserFound;
     private String userId;
@@ -31,7 +32,6 @@ public class AfterLoginActivity extends AppCompatActivity
     private User user;
 
     // keys for reading data from SharedPreferences
-    public static final String USER_ID = "userid";
     public static final String USER_NAME = "username";
     public static final String LOCATION = "location";
     private boolean preferencesChanged;
@@ -54,7 +54,6 @@ public class AfterLoginActivity extends AppCompatActivity
                 registerOnSharedPreferenceChangeListener(
                         preferencesChangeListener);
 
-
         //create user
         user = new User();
         //create databasehandler
@@ -70,11 +69,8 @@ public class AfterLoginActivity extends AppCompatActivity
         //first get user id
         Bundle extras = getIntent().getExtras();
         if(extras != null){
-            String userid = extras.getString(MainActivity.USER_ID);
-            this.userId = userid;
-            user.setUserId (userid);
-
-            //set user id to preferences
+            this.userId = extras.getString(MainActivity.USER_ID);
+            user.setUserId (this.userId);
         }
 
        // PreferenceScreen screen = getPreferenceScreen();
@@ -125,14 +121,7 @@ public class AfterLoginActivity extends AppCompatActivity
                         SharedPreferences sharedPreferences, String key) {
                     preferencesChanged = true; // user changed app setting
 
-                    if (key.equals(USER_ID)) {
-                        //update user id
-                        user.setUserId(sharedPreferences.getString(USER_ID, ""));
-                        //update user id to firebase database
-                        databaseHandler.updateUserData(user.getUserId(), "",
-                                MessageEnum.UPDATE_USER_ID);
-                    }
-                    else if (key.equals(USER_NAME)) {
+                    if (key.equals(USER_NAME)) {
                         //update user name
                         user.setName(sharedPreferences.getString(USER_NAME, ""));
                         //update user name to firebase database
@@ -153,16 +142,12 @@ public class AfterLoginActivity extends AppCompatActivity
 
         if (message == MessageEnum.FIND_USER) {
             //check if user found
-            if (result != null || result != "") {
+            if (result != null) {
                 this.user.setName(((User) result).getUserName());
                 this.user.setLocation(((User) result).getUserLocation());
                 //user found
                 //get book list
-                //getBookList();
-                //else user is found from application firebase datab
-                //fetch user name and location from database with user id
-                //create user object and add it to user list
-                //open showBooksActivity
+                databaseHandler.getBookList();
             }
             else { //user not found
 
@@ -172,8 +157,23 @@ public class AfterLoginActivity extends AppCompatActivity
                 //user id is the google account id received from google account
                 startMySettingsActivity();
             }
+        } else if (message == MessageEnum.GET_BOOKS ) {
+            getBookFragment().setBooks();
         }
 
+
+    }
+
+    @Override
+    public void onListFragmentInteraction(Book mItem) {
+        //TODO
+    }
+
+    // gets a reference to the BookFragment
+    private BookFragment getBookFragment() {
+
+        return (BookFragment) getSupportFragmentManager().findFragmentById(
+                R.id.fragment_book_list);
     }
 
     //public Object getBookList() {
