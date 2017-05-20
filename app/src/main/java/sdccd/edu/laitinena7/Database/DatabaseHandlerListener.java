@@ -1,6 +1,6 @@
-package sdccd.edu.laitinena7;
+package sdccd.edu.laitinena7.Database;
 
-import android.view.View;
+import sdccd.edu.laitinena7.Utils.MessageEnum;
 
 /**
  * Created by Tuulikki Laitinen 5/18/2017.

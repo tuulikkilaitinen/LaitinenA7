@@ -1,4 +1,4 @@
-package sdccd.edu.laitinena7;
+package sdccd.edu.laitinena7.Settings;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -6,6 +6,8 @@ import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+
+import sdccd.edu.laitinena7.R;
 
 /**
  * Created by Tuulikki Laitinen on 5/18/2017.

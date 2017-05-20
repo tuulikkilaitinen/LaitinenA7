@@ -10,7 +10,7 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context="sdccd.edu.laitinena7.BookFragment"
+    tools:context="sdccd.edu.laitinena7.BookViews.BookListFragment"
     tools:listitem="@layout/fragment_book"
     tools:showIn="@layout/activity_after_login">
 

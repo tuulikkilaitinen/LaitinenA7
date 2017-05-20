@@ -1,4 +1,4 @@
-package sdccd.edu.laitinena7;
+package sdccd.edu.laitinena7.Settings;
 
 /**
  * Created by Tuulikki Laitinen on 5/18/2017.

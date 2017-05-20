@@ -1,4 +1,4 @@
-package sdccd.edu.laitinena7;
+package sdccd.edu.laitinena7.Database;
 
 import android.util.Log;
 
@@ -9,6 +9,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+
+import sdccd.edu.laitinena7.Utils.Book;
+import sdccd.edu.laitinena7.Utils.MessageEnum;
+import sdccd.edu.laitinena7.Utils.User;
 
 /**
  * Created by Tuulikki Laitinen on 5/18/2017.
@@ -151,7 +155,9 @@ public class DatabaseHandler {
                             ds.child("author").getValue().toString(),
                             ds.child("year").getValue().toString(),
                             ds.child("price").getValue().toString(),
-                            ds.child("ownerid").getValue().toString()
+                            ds.child("ownerid").getValue().toString(),
+                            null, //for owner name now
+                            null //for image path now
                     ));
 
                 }

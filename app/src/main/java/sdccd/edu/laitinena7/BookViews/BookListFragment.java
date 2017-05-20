@@ -1,4 +1,4 @@
-package sdccd.edu.laitinena7;
+package sdccd.edu.laitinena7.BookViews;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -13,12 +13,15 @@ import android.widget.RadioButton;
 
 import java.util.ArrayList;
 
+import sdccd.edu.laitinena7.R;
+import sdccd.edu.laitinena7.Utils.Book;
+
 
 /**
  * Demonstrates the use of {@link RecyclerView} with a {@link LinearLayoutManager} and a
  * {@link GridLayoutManager}.
  */
-public class BookFragment extends Fragment {
+public class BookListFragment extends Fragment {
 
     private static final String TAG = "RecyclerViewFragment";
     private static final String KEY_LAYOUT_MANAGER = "layoutManager";

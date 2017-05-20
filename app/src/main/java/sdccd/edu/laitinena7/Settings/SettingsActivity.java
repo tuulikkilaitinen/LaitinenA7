@@ -1,6 +1,8 @@
-package sdccd.edu.laitinena7;
+package sdccd.edu.laitinena7.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import sdccd.edu.laitinena7.R;
 
 
 public class SettingsActivity extends AppCompatActivity {

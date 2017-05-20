@@ -1,4 +1,4 @@
-package sdccd.edu.laitinena7;
+package sdccd.edu.laitinena7.BookViews;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -7,6 +7,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import sdccd.edu.laitinena7.R;
+import sdccd.edu.laitinena7.Utils.Book;
+import sdccd.edu.laitinena7.Utils.MessageEnum;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Book} and makes a call to the

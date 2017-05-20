@@ -1,29 +1,33 @@
-package sdccd.edu.laitinena7;
+package sdccd.edu.laitinena7.MainApplication;
 
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.preference.EditTextPreference;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.EditText;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
+import sdccd.edu.laitinena7.BookViews.BookListFragment;
+import sdccd.edu.laitinena7.BookViews.BookViewFragment;
+import sdccd.edu.laitinena7.BookViews.OnListFragmentInteractionListener;
+import sdccd.edu.laitinena7.Database.DatabaseHandler;
+import sdccd.edu.laitinena7.Database.DatabaseHandlerListener;
+import sdccd.edu.laitinena7.R;
+import sdccd.edu.laitinena7.Settings.SettingsActivity;
+import sdccd.edu.laitinena7.Utils.Book;
+import sdccd.edu.laitinena7.Utils.MessageEnum;
+import sdccd.edu.laitinena7.Utils.User;
+
 public class AfterLoginActivity extends AppCompatActivity
-    implements DatabaseHandlerListener, OnListFragmentInteractionListener {
+    implements DatabaseHandlerListener, OnListFragmentInteractionListener, BookViewFragment.OnFragmentInteractionListener {
 
     private boolean isUserFound;
     private String userId;
@@ -38,7 +42,8 @@ public class AfterLoginActivity extends AppCompatActivity
     public static final String LOCATION = "location";
     private boolean preferencesChanged;
     private DatabaseHandler databaseHandler;
-    private BookFragment bookFragment;
+    private BookListFragment bookListFragment;
+    private static final String TAG = "AfterLoginActivity";
 
 
 
@@ -60,7 +65,7 @@ public class AfterLoginActivity extends AppCompatActivity
                         preferencesChangeListener);
 
         //getSupportFragmentManager().beginTransaction().add(R.id.fragment_book_list,
-                //new BookFragment(), "booklist").commit();
+                //new BookListFragment(), "booklist").commit();
 
         //create user
         user = new User();
@@ -166,7 +171,7 @@ public class AfterLoginActivity extends AppCompatActivity
                 startMySettingsActivity();
             }
         } else if (message == MessageEnum.GET_BOOKS ) {
-            getBookFragment().setBooks((ArrayList<Book>)result);
+            getBookListFragment().setBooks((ArrayList<Book>)result);
         }
 
 
@@ -175,22 +180,53 @@ public class AfterLoginActivity extends AppCompatActivity
     @Override
     public void onListFragmentInteraction(MessageEnum message, Book mItem) {
 
-        //open book view activity
+        //open book view fragment
+        //create bundle for fragment
+        Bundle data = new Bundle();
+        data.putSerializable("Book", mItem);
+        // Create new fragment and transaction
+        BookViewFragment bookViewFragment = new BookViewFragment();
+        //set arguments/bundle to fragment
+        bookViewFragment.setArguments(data);
+        // consider using Java coding conventions (upper first char class names!!!)
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack
+        transaction.replace(R.id.activityAfterLoginId, bookViewFragment);
+        transaction.addToBackStack(null);
+
+        // Commit the transaction
+        transaction.commit();
     }
 
-    // gets a reference to the BookFragment
-    private BookFragment getBookFragment() {
+    // gets a reference to the BookListFragment
+    private BookListFragment getBookListFragment() {
 
-        BookFragment bookFragment = (BookFragment)
+        BookListFragment bookListFragment = (BookListFragment)
                 getSupportFragmentManager().findFragmentById(R.id.bookListFragment);
 
-        //return (BookFragment) getSupportFragmentManager().findFragmentById(
+        //return (BookListFragment) getSupportFragmentManager().findFragmentById(
                // R.id.fragment_book_list);
-        return bookFragment;
+        return bookListFragment;
     }
 
     private static String getFragmentName(int viewId, int id) {
         return "android:switcher:" + viewId + ":" + id;
+    }
+
+    @Override
+    public void onFragmentInteraction(MessageEnum message, Object result) {
+        //Log.i(TAG, " must implement OnFragmentInteractionListener");
+
+        //if buyer, open chat view with owner
+        //else if owner, open chat view list with list of buyers, TODO
+        if (!((Book)result).getOwnerId().equals(user.getUserId())) {
+
+            //so not owner, open chat view
+
+        }
+
     }
     //public Object getBookList() {
       //  return bookList;

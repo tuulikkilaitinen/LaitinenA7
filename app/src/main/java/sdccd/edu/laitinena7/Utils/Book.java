@@ -1,10 +1,12 @@
-package sdccd.edu.laitinena7;
+package sdccd.edu.laitinena7.Utils;
+
+import java.io.Serializable;
 
 /**
  * Created by Tuulikki Laitinen on 5/18/2017.
  */
 
-public class Book {
+public class Book implements Serializable {
 
     private String id;
     private String name;
@@ -12,6 +14,8 @@ public class Book {
     private String year;
     private String price;
     private String ownerId;
+    private String ownerName;
+    private String imagePath;
 
     public Book () {}
 
@@ -20,7 +24,9 @@ public class Book {
                  String author,
                  String year,
                  String price,
-                 String ownerId) {
+                 String ownerId,
+                 String ownerName,
+                 String imagePath) {
 
         this.id = id;
         this.name = name;
@@ -28,6 +34,8 @@ public class Book {
         this.year = year;
         this.price = price;
         this.ownerId = ownerId;
+        this.ownerName = ownerName;
+        this.imagePath = imagePath;
     }
 
     public String getName() {
@@ -44,5 +52,21 @@ public class Book {
 
     public void setPrice(String price) {
         this.price = price;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public String getYear() {
+        return year;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
     }
 }
