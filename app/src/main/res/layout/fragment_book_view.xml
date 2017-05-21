@@ -16,15 +16,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/imageViewBook" />
 
-        <Button
-            android:text="Chat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/buttonBook"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="15dp" />
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -37,6 +28,15 @@
             android:textSize="18sp"
             android:textStyle="normal|bold"
             android:lineSpacingExtra="8sp" />
+
+        <Button
+            android:text="Chat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonBook"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="15dp" />
 
     </RelativeLayout>
 

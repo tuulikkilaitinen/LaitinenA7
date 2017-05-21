@@ -11,5 +11,7 @@ public enum MessageEnum {
     UPDATE_USER_LOCATION,
     UPDATE_USER_ID,
     GET_BOOKS,
-    CHAT, BOOK_SELECTED
+    CHAT,
+    GET_MESSAGES,
+    BOOK_SELECTED
 }

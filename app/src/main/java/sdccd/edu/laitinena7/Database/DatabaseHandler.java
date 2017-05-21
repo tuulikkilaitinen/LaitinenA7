@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import sdccd.edu.laitinena7.Utils.Book;
 import sdccd.edu.laitinena7.Utils.MessageEnum;
+import sdccd.edu.laitinena7.Utils.MyMessage;
 import sdccd.edu.laitinena7.Utils.User;
 
 /**
@@ -26,6 +27,9 @@ public class DatabaseHandler {
     private DatabaseHandlerListener listener;
     private User user;
     private ArrayList<Book> books;
+    private ArrayList<MyMessage> messages;
+    private MyMessage message;
+    private boolean checkIsMeSender;
 
     public DatabaseHandler (DatabaseHandlerListener listener) {
         this.listener = listener;
@@ -63,33 +67,9 @@ public class DatabaseHandler {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                System.out.println (databaseError.getMessage());
+                Log.i (TAG, databaseError.getMessage());
             }
         });
-        //mDatabase= FirebaseDatabase.getInstance().getReference().child("your_no‌​de_name").child("use‌​rID");
-        /*
-        myRef.orderByChild().equalTo(userId).addListenerForSingleValueEvent
-                (new ValueEventListener() {
-
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren()) {
-                            ///Log.d(TAG, "PARENT: "+ childDataSnapshot.getKey());
-                            //Log.d(TAG,""+ childDataSnapshot.child("name").getValue());
-                            String name = (String)childDataSnapshot.child("name").getValue();
-                            if (name != null) {
-                                DatabaseHandler.this.sendMessage(MessageEnum.FIND_USER, name);
-                                break; //break from for loop
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.d(TAG, databaseError.getMessage());
-                    }
-                });
-                */
     }
 
     private void sendMessage(MessageEnum message, Object result) {
@@ -171,25 +151,77 @@ public class DatabaseHandler {
             }
         });
     }
-}
 
-/*
-*
-* USERS IN FIREBASE DATABSE:
-* {
-  "users": {
-    "alovelace": {
-      "name": "Ada Lovelace",
-      "location": "92128",
-    },
-    "tuulaiti": {
-      "name": "Tuulikki Laitinen",
-      "location": "92127",
-    },
-    "james": {
-      "name": "James Gappy",
-      "location": "92128",
+    public void getBookMessages(Book book, User user) {
+
+        //final values for checking in inner class
+        final Book checkBook = book;
+        final User checkUser = user;
+        //get always new reference to database in case connection
+        //has changed
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        //https://laitinena7-55fef.firebaseio.com/
+
+        DatabaseReference myRef = database.getReference().
+                                    child("users").child(user.getUserId()).child("messages");
+        // In NoSQL you typically model your data for the way your app consumes it
+        // (see this article on NoSQL data modeling). So if you app needs a list of
+        // all conversations for a user, consider storing a list of all conversations
+        // for each user /users/<uid>/conversations/<conversationid>.
+        // – Frank van Puffelen Jul 16 '16 at 14:25
+        //so stored data in /users/<uid>/messages/<messageid>/bookid, receiverid, senderid, text,
+        //timestamp
+
+        //get all changes, so that chat view is updated in real time
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //if message found
+                if (dataSnapshot.getChildrenCount() != 0) {
+                    messages = new ArrayList<MyMessage>();
+                    //go through all the user messages
+                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                        //if same book, create message object and get data and add to
+                        //messages list
+                        //get message id
+                        if (checkBook.getId().equals(ds.child("bookid").getValue().toString())) {
+                            //check value for is me sender
+                            if (checkUser.getUserId().equals(ds.child("senderid").getValue().toString())) {
+                                checkIsMeSender = true;
+                            }
+                            else {
+                                checkIsMeSender = false;
+                            }
+                            message = new MyMessage(
+                                    ds.getKey().toString(), //id
+                                    ds.child("timestamp").getValue().toString(),
+                                    ds.child("text").getValue().toString(),
+                                    checkBook.getId(),
+                                    ds.child("senderid").getValue().toString(),
+                                    ds.child("receiverid").getValue().toString(),
+                                    checkIsMeSender
+                                                    );
+                            messages.add(message);
+                        }
+                        else {
+                            System.out.println("check book id: "+checkBook.getId());
+                            System.out.println ("ds.child bookid "+ds.child("bookid").getValue().toString());
+                        }
+                    }
+
+                    DatabaseHandler.this.sendMessage(MessageEnum.GET_MESSAGES, messages);
+                }
+                //else send null as Object
+                else {
+                    DatabaseHandler.this.sendMessage(MessageEnum.GET_MESSAGES, null);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println (databaseError.getMessage());
+            }
+        });
     }
-  }
-}
-* */
+
+} //end of class

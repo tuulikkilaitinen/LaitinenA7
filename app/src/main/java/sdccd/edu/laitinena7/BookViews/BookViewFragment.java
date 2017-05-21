@@ -7,6 +7,7 @@ import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,14 +16,6 @@ import sdccd.edu.laitinena7.Utils.Book;
 import sdccd.edu.laitinena7.Utils.MessageEnum;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link BookViewFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link BookViewFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class BookViewFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -38,6 +31,7 @@ public class BookViewFragment extends Fragment {
     private Book book;
     private ImageView imageView;
     private TextView textView;
+    private Button chatButton;
 
 
     public BookViewFragment() {
@@ -102,15 +96,21 @@ public class BookViewFragment extends Fragment {
                          "Price: "      +"$"+book.getPrice()     + "\n" +
                          "Seller Name: "+    book.getOwnerName() + "\n"
                         );
-
+        //get button and attach listener
+        chatButton = (Button)view.findViewById(R.id.buttonBook);
+        chatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onButtonPressed(MessageEnum.CHAT, book);
+            }
+        });
 
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onButtonPressed(MessageEnum message, Book book) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(MessageEnum.CHAT, book);
+            mListener.onFragmentInteraction(message, book);
         }
     }
 
@@ -141,8 +141,5 @@ public class BookViewFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(MessageEnum message, Object result);
-    }
 }
+

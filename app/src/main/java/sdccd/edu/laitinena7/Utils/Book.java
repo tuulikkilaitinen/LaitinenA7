@@ -69,4 +69,8 @@ public class Book implements Serializable {
     public String getOwnerId() {
         return ownerId;
     }
+
+    public String getId() {
+        return id;
+    }
 }

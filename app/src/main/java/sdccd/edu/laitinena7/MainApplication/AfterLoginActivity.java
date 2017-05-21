@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -14,20 +15,28 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import sdccd.edu.laitinena7.BookViews.BookListFragment;
 import sdccd.edu.laitinena7.BookViews.BookViewFragment;
+import sdccd.edu.laitinena7.BookViews.OnFragmentInteractionListener;
 import sdccd.edu.laitinena7.BookViews.OnListFragmentInteractionListener;
+import sdccd.edu.laitinena7.Chat.ChatMessageFragment;
+import sdccd.edu.laitinena7.Chat.OnChatMessageFragmentInteractionListener;
 import sdccd.edu.laitinena7.Database.DatabaseHandler;
 import sdccd.edu.laitinena7.Database.DatabaseHandlerListener;
 import sdccd.edu.laitinena7.R;
 import sdccd.edu.laitinena7.Settings.SettingsActivity;
 import sdccd.edu.laitinena7.Utils.Book;
 import sdccd.edu.laitinena7.Utils.MessageEnum;
+import sdccd.edu.laitinena7.Utils.MyMessage;
+import sdccd.edu.laitinena7.Utils.StatusEnum;
 import sdccd.edu.laitinena7.Utils.User;
 
 public class AfterLoginActivity extends AppCompatActivity
-    implements DatabaseHandlerListener, OnListFragmentInteractionListener, BookViewFragment.OnFragmentInteractionListener {
+    implements DatabaseHandlerListener, OnListFragmentInteractionListener,
+        OnChatMessageFragmentInteractionListener,
+        OnFragmentInteractionListener {
 
     private boolean isUserFound;
     private String userId;
@@ -45,6 +54,7 @@ public class AfterLoginActivity extends AppCompatActivity
     private BookListFragment bookListFragment;
     private static final String TAG = "AfterLoginActivity";
 
+    private StatusEnum status;
 
 
     @Override
@@ -168,22 +178,70 @@ public class AfterLoginActivity extends AppCompatActivity
                 // show settings page to set up
                 //user name (which is shown to other users) and location
                 //user id is the google account id received from google account
+                //TODO LISTEN THAT IF BACK KEY IS PRESSED
                 startMySettingsActivity();
             }
         } else if (message == MessageEnum.GET_BOOKS ) {
             getBookListFragment().setBooks((ArrayList<Book>)result);
+        } else if (message == MessageEnum.GET_MESSAGES) {
+            //check status
+            if (status != StatusEnum.STARTED_CHAT_MESSAGE) {
+                startChatMessageFragment((ArrayList<MyMessage>) result);
+            }
+            else {
+                //else set up messages to view
+                getChatMessageFragment().setMessages((ArrayList<MyMessage>)result);
+            }
+           // getChatMessageFragment().setMessages((ArrayList<MyMessage>)result);
         }
+
+
+
+        //TEST
+        Calendar calendar = Calendar.getInstance();
+        long timeInMillis = calendar.getTimeInMillis();
+        Log.i(TAG, "timeInMillis: "+ Long.valueOf(timeInMillis));
 
 
     }
 
-    @Override
-    public void onListFragmentInteraction(MessageEnum message, Book mItem) {
+    private void startChatMessageFragment(ArrayList<MyMessage> messages) {
+
+        //update application status
+        status = StatusEnum.STARTED_CHAT_MESSAGE;
 
         //open book view fragment
         //create bundle for fragment
         Bundle data = new Bundle();
-        data.putSerializable("Book", mItem);
+        data.putSerializable("Messages", messages);
+        // Create new fragment and transaction
+        ChatMessageFragment chatViewFragment = new ChatMessageFragment();
+        //set arguments/bundle to fragment
+        chatViewFragment.setArguments(data);
+        // consider using Java coding conventions (upper first char class names!!!)
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack
+        transaction.replace(R.id.activityAfterLoginId, chatViewFragment);
+        transaction.addToBackStack(null);
+
+        // Commit the transaction
+        transaction.commit();
+    }
+
+    @Override
+    public void onListFragmentInteraction(MessageEnum message, Book book) {
+
+        startBookViewFragment(book);
+    }
+
+    private void startBookViewFragment(Book book) {
+
+        //open book view fragment
+        //create bundle for fragment
+        Bundle data = new Bundle();
+        data.putSerializable("Book", book);
         // Create new fragment and transaction
         BookViewFragment bookViewFragment = new BookViewFragment();
         //set arguments/bundle to fragment
@@ -211,6 +269,16 @@ public class AfterLoginActivity extends AppCompatActivity
         return bookListFragment;
     }
 
+    private ChatMessageFragment getChatMessageFragment() {
+
+        ChatMessageFragment chatMessageFragment = (ChatMessageFragment)
+                getFragmentManager().findFragmentById(R.id.chatListFragment);
+
+        //return (BookListFragment) getSupportFragmentManager().findFragmentById(
+        // R.id.fragment_book_list);
+        return chatMessageFragment;
+    }
+
     private static String getFragmentName(int viewId, int id) {
         return "android:switcher:" + viewId + ":" + id;
     }
@@ -220,12 +288,22 @@ public class AfterLoginActivity extends AppCompatActivity
         //Log.i(TAG, " must implement OnFragmentInteractionListener");
 
         //if buyer, open chat view with owner
-        //else if owner, open chat view list with list of buyers, TODO
+        //TODO else if owner, open chat view list with list of buyers
         if (!((Book)result).getOwnerId().equals(user.getUserId())) {
 
             //so not owner, open chat view
+            //actually first get previous messages from Firebase database
+            //regarding this bookid
+            databaseHandler.getBookMessages((Book)result, this.user);
+
 
         }
+
+    }
+
+    @Override
+    public void onChatMessageFragmentInteraction(MessageEnum message, Object result) {
+        //TODO WHAT HAPPENS HERE
 
     }
     //public Object getBookList() {
