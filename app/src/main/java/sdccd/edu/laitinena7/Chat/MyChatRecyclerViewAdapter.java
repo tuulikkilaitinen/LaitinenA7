@@ -1,5 +1,7 @@
 package sdccd.edu.laitinena7.Chat;
 
+import android.graphics.Color;
+import android.support.annotation.UiThread;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -40,6 +42,8 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
     private  String bookId = "";
     private  String senderId = "";
     private  String receiverId = "";
+    private String previousDate = "";
+    private boolean isDataChanged = false;
 
     public MyChatRecyclerViewAdapter(ArrayList<MyMessage> items, OnChatMessageFragmentInteractionListener listener) {
         mValues = items;
@@ -71,13 +75,21 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
         String mDay = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
         String mTime = Integer.toString(calendar.get(Calendar.HOUR)) +
                        ":" +
-                       Integer.toString(calendar.get(Calendar.SECOND))     ;
+                       Integer.toString(calendar.get(Calendar.SECOND));
+
 
         //holder.mContentDate.setText(mYear+" "+mMonth+" "+mDay);
         //check if chats have this, if they have it, just hide it
         if (!haveDate) {
             holder.mContentDate.setText(mMonth + " " + mDay + ", " + mYear);
             haveDate = true;
+            previousDate = mMonth + " " + mDay + ", " + mYear;
+            holder.mContentDate.setVisibility(View.VISIBLE);
+        }
+        else if (!previousDate.equals(mMonth + " " + mDay + ", " + mYear)) {
+            holder.mContentDate.setText(mMonth + " " + mDay + ", " + mYear);
+            previousDate = mMonth + " " + mDay + ", " + mYear;
+            holder.mContentDate.setVisibility(View.VISIBLE);
         }
         else {
             holder.mContentDate.setVisibility(View.GONE);
@@ -99,14 +111,17 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
         //if message not from this user, push message and time
         // to right side of screen with gravity
         if (!mValues.get(position).getIsMeSender()) {
-            //holder.mContentMessage.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_END);
-            //holder.mContentTime.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_END);
+
+            holder.mContentMessage.setTextColor(Color.BLUE);
+            holder.mContentTime.setTextColor(Color.BLUE);
 
         }
         else {
-            //else they go left
+            //else they are black
+            holder.mContentMessage.setTextColor(Color.BLACK);
+            holder.mContentTime.setTextColor(Color.BLACK);
             //holder.mContentMessage.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
-            //holder.mContentTime.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+           // holder.mContentTime.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
         }
 
         /* !!!! You can't click chat messages!!
@@ -179,6 +194,15 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
 
         mValues.clear();
         mValues.addAll(myMessages);
+
+        dataSetChanged();
+    }
+
+    @UiThread
+    protected void dataSetChanged() {
+        //reset values
+        haveDate = false;
+        previousDate = "";
         notifyDataSetChanged();
     }
 
@@ -225,18 +249,25 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
                 @Override
                 public void onClick(View v) {
 
-                    Calendar calendar = Calendar.getInstance();
-                    long timeInMillis = calendar.getTimeInMillis();
-                    MyMessage sendChatMessage = new MyMessage (
+                    //check if message not empty
+                    if (sendMessage != null && !sendMessage.isEmpty()
+                            && !sendMessage.equals("")
+                            && !sendMessage.equals(" ")) {
+
+                        Calendar calendar = Calendar.getInstance();
+                        long timeInMillis = calendar.getTimeInMillis();
+                        MyMessage sendChatMessage = new MyMessage(
                             "",
                             String.valueOf(timeInMillis),
                             sendMessage,
-                            mValues.get(mValues.size()-1).getBookId(),
+                            mValues.get(mValues.size() - 1).getBookId(),
                             senderId, //"", so fill up later
                             receiverId, //"", so fill up later
                             true //isMeSender is true
-                    );
-                    onSendButtonPressed(MessageEnum.SEND_CHAT_MESSAGE, sendChatMessage);
+                        );
+                        onSendButtonPressed(MessageEnum.SEND_CHAT_MESSAGE, sendChatMessage);
+                        mEditText.setText("");
+                    }
                 }
             });
 /*    public MyMessage(

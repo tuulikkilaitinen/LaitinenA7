@@ -93,8 +93,7 @@ public class BookViewFragment extends Fragment {
         textView.setText("Name: "       +    book.getName()      + "\n" +
                          "Author: "     +    book.getAuthor()    + "\n" +
                          "Year: "       +    book.getYear()      + "\n" +
-                         "Price: "      +"$"+book.getPrice()     + "\n" +
-                         "Seller Name: "+    book.getOwnerName() + "\n"
+                         "Price: "      +"$"+book.getPrice()     + "\n"
                         );
         //get button and attach listener
         chatButton = (Button)view.findViewById(R.id.buttonBook);

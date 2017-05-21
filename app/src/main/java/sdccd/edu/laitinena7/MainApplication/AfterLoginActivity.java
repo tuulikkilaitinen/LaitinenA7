@@ -4,6 +4,7 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -57,6 +58,7 @@ public class AfterLoginActivity extends AppCompatActivity
     private StatusEnum status;
     private Book selectedBook;
     private ChatMessageFragment chatMessageFragment;
+    private String receiverId = "";
 
 
     @Override
@@ -185,6 +187,7 @@ public class AfterLoginActivity extends AppCompatActivity
             }
         } else if (message == MessageEnum.GET_BOOKS ) {
             if(status != StatusEnum.STARTED_BOOK_LIST) {
+                status = StatusEnum.STARTED_BOOK_LIST;
                 startBookListFragment((ArrayList<Book>) result);
             }
             else {
@@ -193,6 +196,7 @@ public class AfterLoginActivity extends AppCompatActivity
         } else if (message == MessageEnum.GET_MESSAGES) {
             //check status
             if (status != StatusEnum.STARTED_CHAT_MESSAGE) {
+                status = StatusEnum.STARTED_CHAT_MESSAGE;
                 startChatMessageFragment((ArrayList<MyMessage>) result);
             }
             else {
@@ -237,6 +241,26 @@ public class AfterLoginActivity extends AppCompatActivity
     }
 
     private void startChatMessageFragment(ArrayList<MyMessage> messages) {
+
+        //first set up RECEIVER
+        //        ((MyMessage)result).setReceiverId(this.selectedBook.getOwnerId());
+        //if owner id is the same as user id, receiver will be get from messages
+        //if messages not null, otherwise receiver is the same is book owner id
+        if (this.selectedBook.getOwnerId().equals(this.userId)) {
+            for (MyMessage message : messages) {
+                if (!message.getReceiverId().equals(this.userId)) {
+                    this.receiverId = message.getReceiverId();
+                    break;
+                }
+                else if (!message.getSenderId().equals(this.userId)) {
+                    this.receiverId = message.getSenderId();
+                    break;
+                }
+            }
+        }
+        else {
+            this.receiverId = this.selectedBook.getOwnerId();
+        }
 
         //update application status
         status = StatusEnum.STARTED_CHAT_MESSAGE;
@@ -328,8 +352,10 @@ public class AfterLoginActivity extends AppCompatActivity
             //actually first get previous messages from Firebase database
             //regarding this bookid
             databaseHandler.getBookMessages((Book)result, this.user);
-
-
+        }
+        else {
+            //TODO open with list of buyers.....
+            databaseHandler.getBookMessages((Book)result, this.user);
         }
 
     }
@@ -338,7 +364,7 @@ public class AfterLoginActivity extends AppCompatActivity
     public void onChatMessageFragmentInteraction(MessageEnum message, Object result) {
         //fill up the rest of the message
         ((MyMessage)result).setSenderId(this.user.getUserId());
-        ((MyMessage)result).setReceiverId(this.selectedBook.getOwnerId());
+        ((MyMessage)result).setReceiverId(this.receiverId);
         //send message to message list
         databaseHandler.sendMessageToDatabase((MyMessage)result);
         //message should come back with reference change?

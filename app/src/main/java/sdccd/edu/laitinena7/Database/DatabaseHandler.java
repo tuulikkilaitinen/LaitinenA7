@@ -9,6 +9,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import sdccd.edu.laitinena7.Utils.Book;
 import sdccd.edu.laitinena7.Utils.MessageEnum;
@@ -179,6 +181,7 @@ public class DatabaseHandler {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 long childrenCount = dataSnapshot.getChildrenCount();
                 int dsCount = 0;
+                String bookId = "";
                 String senderId = "";
                 String receiverId = "";
                 String text = "";
@@ -192,28 +195,64 @@ public class DatabaseHandler {
                         dsCount++;
                         //if same book, create message object and get data and add to
                         //messages list
-                        //get message id
-                        String bookId = ds.child("bookid").getValue().toString();
+
                         //if not the last message
-                        if (dsCount < childrenCount) {
-                            senderId = ds.child("senderid").getValue().toString();
-                            receiverId = ds.child("receiverid").getValue().toString();
-                            text = ds.child("text").getValue().toString();
-                            timeStamp = ds.child("timestamp").getValue().toString();
+                        Object bObject = ds.child("bookid").getValue();
+                        if (bObject != null) {
+                            bookId = bObject.toString();
                         }
-                        else if (dsCount == childrenCount && DatabaseHandler.this.lastSentMessage == null) {
-                            senderId = ds.child("senderid").getValue().toString();
-                            receiverId = ds.child("receiverid").getValue().toString();
-                            text = ds.child("text").getValue().toString();
-                            timeStamp = ds.child("timestamp").getValue().toString();
+                        else {
+                            bookId = DatabaseHandler.this.lastSentMessage.getBookId();
                         }
+                        Object sObject = ds.child("senderid").getValue();
+                        if (sObject != null) {
+                            senderId = sObject.toString();
+                        }
+                        else {
+                            senderId = DatabaseHandler.this.lastSentMessage.getSenderId();
+                        }
+                        Object rObject = ds.child("receiverid").getValue();
+                        if (rObject != null) {
+                            receiverId = rObject.toString();
+                        }
+                        else {
+                            receiverId = DatabaseHandler.this.lastSentMessage.getReceiverId();
+                        }
+                        Object tObject = ds.child("text").getValue();
+                        if (tObject != null) {
+                            text = tObject.toString();
+                        }
+                        else {
+                            text = DatabaseHandler.this.lastSentMessage.getText();
+                        }
+                        Object tSObject = ds.child("timestamp").getValue();
+                        if (tSObject != null) {
+                            timeStamp = tSObject.toString();
+                        }
+                        else {
+                            timeStamp = DatabaseHandler.this.lastSentMessage.getTimeStamp();
+                        }
+
+                            //get message id
+                        /*
+                        bookId = ds.child("bookid").getValue().toString();
+                        senderId = ds.child("senderid").getValue().toString();
+                        receiverId = ds.child("receiverid").getValue().toString();
+                        text = ds.child("text").getValue().toString();
+                        timeStamp = ds.child("timestamp").getValue().toString();
+*/
+
+/*
                         //else the last one, HACKKKKKKKK from last sent message
                         else if (dsCount == childrenCount && DatabaseHandler.this.lastSentMessage != null){
+                            //get message id
+                            bookId = DatabaseHandler.this.lastSentMessage.getBookId();
                             senderId = DatabaseHandler.this.lastSentMessage.getSenderId();
                             receiverId = DatabaseHandler.this.lastSentMessage.getReceiverId();
                             text = DatabaseHandler.this.lastSentMessage.getText();
                             timeStamp = DatabaseHandler.this.lastSentMessage.getTimeStamp();
                         }
+                        */
                         if (checkBook.getId().equals(bookId)) {
                             //check value for is me sender
 
@@ -261,6 +300,8 @@ public class DatabaseHandler {
 
         //save last message
         this.lastSentMessage = message;
+
+        //FOR SENDER
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         //https://laitinena7-55fef.firebaseio.com/
         DatabaseReference myRef1 = database.getReference().child("users").child(
@@ -268,18 +309,27 @@ public class DatabaseHandler {
         String mGroupId = myRef1.push().getKey();
 
         final FirebaseDatabase database2 = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference().child("users").child(
+        DatabaseReference myRef = database2.getReference().child("users").child(
                 message.getSenderId()).child("messages").child(mGroupId);
-        //myRef.setValue(mGroupId); //TODO change...................
+        myRef.setValue(mGroupId);
         //fill up message information
         //bookid, receiverid, senderid, text, timestamp
 
+        Map<String, String> map2 = new HashMap<String, String>();
+        map2.put("bookid", message.getBookId());
+        map2.put("receiverid", message.getReceiverId());
+        map2.put("senderid", message.getSenderId());
+        map2.put("text", message.getText());
+        map2.put("timestamp", message.getTimeStamp());
+        //Firebase fire = new Firebase("********").child(markerName);
+        myRef.setValue(map2);
+/*
         myRef.child("bookid").setValue(message.getBookId());
         myRef.child("receiverid").setValue(message.getReceiverId());
         myRef.child("senderid").setValue(message.getSenderId());
         myRef.child("text").setValue(message.getText());
         myRef.child("timestamp").setValue(message.getTimeStamp());
-
+*/
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -292,5 +342,48 @@ public class DatabaseHandler {
             }
         });
 
+
+        //FOR RECEIVER
+        final FirebaseDatabase database3 = FirebaseDatabase.getInstance();
+        //https://laitinena7-55fef.firebaseio.com/
+        DatabaseReference myRef2 = database3.getReference().child("users").child(
+                message.getReceiverId()).child("messages");
+        String mGroupId2 = myRef2.push().getKey();
+
+        final FirebaseDatabase database4 = FirebaseDatabase.getInstance();
+        DatabaseReference myRef3 = database4.getReference().child("users").child(
+                message.getReceiverId()).child("messages").child(mGroupId2);
+        //myRef.setValue(mGroupId); //TODO change...................
+        //fill up message information
+        //bookid, receiverid, senderid, text, timestamp
+
+        Map<String, String> map3 = new HashMap<String, String>();
+        map3.put("bookid", message.getBookId());
+        map3.put("receiverid", message.getReceiverId());
+        map3.put("senderid", message.getSenderId());
+        map3.put("text", message.getText());
+        map3.put("timestamp", message.getTimeStamp());
+        //Firebase fire = new Firebase("********").child(markerName);
+        myRef3.setValue(map3);
+/*
+        myRef3.child("bookid").setValue(message.getBookId());
+        myRef3.child("receiverid").setValue(message.getReceiverId());
+        myRef3.child("senderid").setValue(message.getSenderId());
+        myRef3.child("text").setValue(message.getText());
+        myRef3.child("timestamp").setValue(message.getTimeStamp());
+*/
+        myRef3.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.i(TAG, "sendMessageToDatabase, onDataChange");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(TAG, databaseError.getMessage());
+            }
+        });
+
     }
+
 } //end of class
