@@ -386,4 +386,45 @@ public class DatabaseHandler {
 
     }
 
+    public void sendBookToDatabase(Book book) {
+
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        //https://laitinena7-55fef.firebaseio.com/
+        DatabaseReference myRef1 = database.getReference().child("books");
+        String mGroupId = myRef1.push().getKey();
+
+        final FirebaseDatabase database2 = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database2.getReference().child("books").child(mGroupId);
+        myRef.setValue(mGroupId);
+        //fill up message information
+        //bookid, receiverid, senderid, text, timestamp
+
+        Map<String, String> map2 = new HashMap<String, String>();
+        map2.put("author", book.getAuthor());
+        map2.put("name", book.getName());
+        map2.put("ownerid", book.getOwnerId());
+        map2.put("price", book.getPrice());
+        map2.put("year", book.getYear());
+        //Firebase fire = new Firebase("********").child(markerName);
+        myRef.setValue(map2);
+/*
+        myRef.child("bookid").setValue(message.getBookId());
+        myRef.child("receiverid").setValue(message.getReceiverId());
+        myRef.child("senderid").setValue(message.getSenderId());
+        myRef.child("text").setValue(message.getText());
+        myRef.child("timestamp").setValue(message.getTimeStamp());
+*/
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.i(TAG, "sendBookToDatabase, onDataChange");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(TAG, databaseError.getMessage());
+            }
+        });
+    }
+
 } //end of class

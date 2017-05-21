@@ -3,15 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainApplication.AfterLoginActivity">
 
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:orderInCategory="100"
-        app:showAsAction="always"/>
-
 
     <item android:id="@+id/menu_search"
         app:showAsAction="ifRoom"
         android:title="Search"
-        app:actionViewClass="android.support.v7.widget.SearchView"
-        />
+        app:actionViewClass="android.support.v7.widget.SearchView"/>
+
+    <item android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_settings_black_24dp"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/add_book"
+        android:title="Add Book"
+        android:icon="@drawable/ic_add_circle_black_24dp"
+        app:showAsAction="ifRoom"/>
+
+
+
 </menu>

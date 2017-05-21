@@ -2,12 +2,10 @@ package sdccd.edu.laitinena7.MainApplication;
 
 import android.app.FragmentTransaction;
 import android.app.SearchManager;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,6 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import sdccd.edu.laitinena7.BookViews.AddBookFragment;
 import sdccd.edu.laitinena7.BookViews.BookListFragment;
 import sdccd.edu.laitinena7.BookViews.BookViewFragment;
 import sdccd.edu.laitinena7.BookViews.OnFragmentInteractionListener;
@@ -193,10 +192,28 @@ public class AfterLoginActivity extends AppCompatActivity
         startActivity(preferencesIntent);
     }
 
-    // displays the SettingsActivity when running on a phone
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        startMySettingsActivity();
+
+        //check which id
+        // switch based on the MenuItem id
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                // displays the SettingsActivity when running on a phone
+                startMySettingsActivity();
+                // consume the menu event
+                return true;
+
+            case R.id.add_book:
+                startAddBookFragment();
+            // consume the menu event
+                return true;
+
+            default:
+                break;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -387,6 +404,27 @@ public class AfterLoginActivity extends AppCompatActivity
         transaction.commit();
     }
 
+    private void startAddBookFragment() {
+
+        status = StatusEnum.STARTED_ADD_BOOK;
+        //hide search from menu
+        this.menu.findItem(R.id.menu_search).setVisible(false);
+
+        // Create new fragment and transaction
+        AddBookFragment addBookFragment = new AddBookFragment();
+
+        // consider using Java coding conventions (upper first char class names!!!)
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack
+        transaction.replace(R.id.activityAfterLoginId, addBookFragment);
+        transaction.addToBackStack(null);
+
+        // Commit the transaction
+        transaction.commit();
+    }
+
     // gets a reference to the BookListFragment
     private BookListFragment getBookListFragment() {
 
@@ -415,6 +453,11 @@ public class AfterLoginActivity extends AppCompatActivity
     @Override
     public void onFragmentInteraction(MessageEnum message, Object result) {
         //Log.i(TAG, " must implement OnFragmentInteractionListener");
+
+        if (message == MessageEnum.ADD_BOOK) {
+            ((Book)result).setOwnderId(user.getUserId());
+            databaseHandler.sendBookToDatabase((Book)result);
+        }
 
         //if buyer, open chat view with owner
         //TODO else if owner, open chat view list with list of buyers

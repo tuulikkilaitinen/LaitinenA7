@@ -1,0 +1,198 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="sdccd.edu.laitinena7.BookViews.AddBookFragment"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <Button
+            android:text="ADD"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonAddBook"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="15dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:paddingBottom="20dp"
+                android:paddingTop="20dp">
+
+                <TextView
+                    android:text="Title:"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textViewTitle"
+                    android:layout_weight="0.19"
+                    android:textColor="@android:color/black"
+                    android:textStyle="normal|bold"
+                    android:textSize="18sp"
+                    android:lineSpacingExtra="14sp"
+                    android:textAlignment="textStart"
+                    android:paddingRight="20dp"
+                    android:paddingTop="20dp" />
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:ems="10"
+                    android:id="@+id/editTextTitle"
+                    android:hint="Add Title" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:paddingBottom="20dp"
+                android:paddingTop="20dp">
+
+                <TextView
+                    android:text="Author:"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textViewAuthor"
+                    android:layout_weight="0.19"
+                    android:textColor="@android:color/black"
+                    android:textStyle="normal|bold"
+                    android:textSize="18sp"
+                    android:lineSpacingExtra="14sp"
+                    android:textAlignment="textStart"
+                    android:paddingRight="20dp"
+                    android:paddingTop="20dp" />
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:ems="10"
+                    android:id="@+id/editTextAuthor"
+                    android:hint="Add Author(s)" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:paddingBottom="20dp"
+                android:paddingTop="20dp">
+
+            <TextView
+                android:text="Year:"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewYear"
+                android:layout_weight="0.19"
+                android:textColor="@android:color/black"
+                android:textStyle="normal|bold"
+                android:textSize="18sp"
+                android:lineSpacingExtra="14sp"
+                android:textAlignment="textStart"
+                android:paddingRight="20dp"
+                android:paddingTop="20dp" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:ems="10"
+                android:id="@+id/editTextYear"
+                android:hint="Add Year" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:paddingBottom="20dp"
+                android:paddingTop="20dp">
+
+            <TextView
+                android:text="Price:"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewPrice"
+                android:layout_weight="0.17"
+                android:textColor="@android:color/black"
+                android:textStyle="normal|bold"
+                android:textSize="18sp"
+                android:lineSpacingExtra="14sp"
+                android:textAlignment="textStart"
+                android:paddingRight="20dp"
+                android:paddingTop="20dp" />
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    android:ems="10"
+                    android:id="@+id/editTextPrice"
+                    android:hint="Add Price" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:paddingBottom="20dp"
+                android:paddingTop="20dp">
+
+                <TextView
+                    android:text="Add Image:"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView"
+                    android:layout_weight="0.00"
+                    android:textColor="@android:color/black"
+                    android:textStyle="normal|bold"
+                    android:textSize="18sp"
+                    android:lineSpacingExtra="24sp"
+                    android:gravity="bottom"
+                    android:paddingBottom="20dp"
+                    android:paddingTop="20dp"
+                    android:paddingRight="20dp" />
+
+
+                <ImageButton
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@android:drawable/ic_menu_camera"
+                    android:id="@+id/imageButton"
+                    android:layout_below="@+id/textView"
+                    android:layout_alignStart="@+id/buttonAddBook"
+                    android:layout_marginStart="49dp"
+                    android:layout_width="wrap_content" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</FrameLayout>
