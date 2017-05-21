@@ -47,6 +47,26 @@ public class MyMessage implements Serializable {
     public String getText() {
         return text;
     }
+
+    public String getBookId() {
+        return bookId;
+    }
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
+    }
+
+    public void setReceiverId(String receiverId) {
+        this.receiverId = receiverId;
+    }
+
+    public String getReceiverId() {
+        return receiverId;
+    }
 }
 /*
 * import java.util.Calendar

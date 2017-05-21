@@ -13,5 +13,5 @@ public enum MessageEnum {
     GET_BOOKS,
     CHAT,
     GET_MESSAGES,
-    BOOK_SELECTED
+    SEND_CHAT_MESSAGE, BOOK_SELECTED
 }

@@ -55,6 +55,8 @@ public class AfterLoginActivity extends AppCompatActivity
     private static final String TAG = "AfterLoginActivity";
 
     private StatusEnum status;
+    private Book selectedBook;
+    private ChatMessageFragment chatMessageFragment;
 
 
     @Override
@@ -195,7 +197,7 @@ public class AfterLoginActivity extends AppCompatActivity
             }
             else {
                 //else set up messages to view
-                getChatMessageFragment().setMessages((ArrayList<MyMessage>)result);
+                chatMessageFragment.setMessages((ArrayList<MyMessage>)result);
             }
            // getChatMessageFragment().setMessages((ArrayList<MyMessage>)result);
         }
@@ -206,7 +208,6 @@ public class AfterLoginActivity extends AppCompatActivity
         Calendar calendar = Calendar.getInstance();
         long timeInMillis = calendar.getTimeInMillis();
         Log.i(TAG, "timeInMillis: "+ Long.valueOf(timeInMillis));
-
 
     }
 
@@ -245,15 +246,15 @@ public class AfterLoginActivity extends AppCompatActivity
         Bundle data = new Bundle();
         data.putSerializable("Messages", messages);
         // Create new fragment and transaction
-        ChatMessageFragment chatViewFragment = new ChatMessageFragment();
+        chatMessageFragment = new ChatMessageFragment();
         //set arguments/bundle to fragment
-        chatViewFragment.setArguments(data);
+        chatMessageFragment.setArguments(data);
         // consider using Java coding conventions (upper first char class names!!!)
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
-        transaction.replace(R.id.activityAfterLoginId, chatViewFragment);
+        transaction.replace(R.id.activityAfterLoginId, chatMessageFragment);
         transaction.addToBackStack(null);
 
         // Commit the transaction
@@ -262,7 +263,7 @@ public class AfterLoginActivity extends AppCompatActivity
 
     @Override
     public void onListFragmentInteraction(MessageEnum message, Book book) {
-
+        this.selectedBook = book; //save information
         startBookViewFragment(book);
     }
 
@@ -304,7 +305,7 @@ public class AfterLoginActivity extends AppCompatActivity
     private ChatMessageFragment getChatMessageFragment() {
 
         ChatMessageFragment chatMessageFragment = (ChatMessageFragment)
-                getFragmentManager().findFragmentById(R.id.chatListFragment);
+                getFragmentManager().findFragmentById(R.id.chatMessageRecyclerView);
 
         //return (BookListFragment) getSupportFragmentManager().findFragmentById(
         // R.id.fragment_book_list);
@@ -335,8 +336,12 @@ public class AfterLoginActivity extends AppCompatActivity
 
     @Override
     public void onChatMessageFragmentInteraction(MessageEnum message, Object result) {
-        System.out.println (result);
-
+        //fill up the rest of the message
+        ((MyMessage)result).setSenderId(this.user.getUserId());
+        ((MyMessage)result).setReceiverId(this.selectedBook.getOwnerId());
+        //send message to message list
+        databaseHandler.sendMessageToDatabase((MyMessage)result);
+        //message should come back with reference change?
     }
     //public Object getBookList() {
       //  return bookList;

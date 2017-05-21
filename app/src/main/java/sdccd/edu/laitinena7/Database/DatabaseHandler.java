@@ -30,6 +30,7 @@ public class DatabaseHandler {
     private ArrayList<MyMessage> messages;
     private MyMessage message;
     private boolean checkIsMeSender;
+    private MyMessage lastSentMessage;
 
     public DatabaseHandler (DatabaseHandlerListener listener) {
         this.listener = listener;
@@ -152,7 +153,7 @@ public class DatabaseHandler {
         });
     }
 
-    public void getBookMessages(Book book, User user) {
+    public void getBookMessages(final Book book, User user) {
 
         //final values for checking in inner class
         final Book checkBook = book;
@@ -176,17 +177,47 @@ public class DatabaseHandler {
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                long childrenCount = dataSnapshot.getChildrenCount();
+                int dsCount = 0;
+                String senderId = "";
+                String receiverId = "";
+                String text = "";
+                String timeStamp = "";
                 //if message found
-                if (dataSnapshot.getChildrenCount() != 0) {
+                if (childrenCount != 0) {
                     messages = new ArrayList<MyMessage>();
+
                     //go through all the user messages
                     for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                        dsCount++;
                         //if same book, create message object and get data and add to
                         //messages list
                         //get message id
-                        if (checkBook.getId().equals(ds.child("bookid").getValue().toString())) {
+                        String bookId = ds.child("bookid").getValue().toString();
+                        //if not the last message
+                        if (dsCount < childrenCount) {
+                            senderId = ds.child("senderid").getValue().toString();
+                            receiverId = ds.child("receiverid").getValue().toString();
+                            text = ds.child("text").getValue().toString();
+                            timeStamp = ds.child("timestamp").getValue().toString();
+                        }
+                        else if (dsCount == childrenCount && DatabaseHandler.this.lastSentMessage == null) {
+                            senderId = ds.child("senderid").getValue().toString();
+                            receiverId = ds.child("receiverid").getValue().toString();
+                            text = ds.child("text").getValue().toString();
+                            timeStamp = ds.child("timestamp").getValue().toString();
+                        }
+                        //else the last one, HACKKKKKKKK from last sent message
+                        else if (dsCount == childrenCount && DatabaseHandler.this.lastSentMessage != null){
+                            senderId = DatabaseHandler.this.lastSentMessage.getSenderId();
+                            receiverId = DatabaseHandler.this.lastSentMessage.getReceiverId();
+                            text = DatabaseHandler.this.lastSentMessage.getText();
+                            timeStamp = DatabaseHandler.this.lastSentMessage.getTimeStamp();
+                        }
+                        if (checkBook.getId().equals(bookId)) {
                             //check value for is me sender
-                            if (checkUser.getUserId().equals(ds.child("senderid").getValue().toString())) {
+
+                            if (checkUser.getUserId().equals(senderId)) {
                                 checkIsMeSender = true;
                             }
                             else {
@@ -194,11 +225,11 @@ public class DatabaseHandler {
                             }
                             message = new MyMessage(
                                     ds.getKey().toString(), //id
-                                    ds.child("timestamp").getValue().toString(),
-                                    ds.child("text").getValue().toString(),
-                                    checkBook.getId(),
-                                    ds.child("senderid").getValue().toString(),
-                                    ds.child("receiverid").getValue().toString(),
+                                    timeStamp,
+                                    text,
+                                    bookId,
+                                    senderId,
+                                    receiverId,
                                     checkIsMeSender
                                                     );
                             messages.add(message);
@@ -224,4 +255,42 @@ public class DatabaseHandler {
         });
     }
 
+    public void sendMessageToDatabase(MyMessage message) {
+        //get always new reference to database in case connection
+        //has changed
+
+        //save last message
+        this.lastSentMessage = message;
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        //https://laitinena7-55fef.firebaseio.com/
+        DatabaseReference myRef1 = database.getReference().child("users").child(
+                message.getSenderId()).child("messages");
+        String mGroupId = myRef1.push().getKey();
+
+        final FirebaseDatabase database2 = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference().child("users").child(
+                message.getSenderId()).child("messages").child(mGroupId);
+        //myRef.setValue(mGroupId); //TODO change...................
+        //fill up message information
+        //bookid, receiverid, senderid, text, timestamp
+
+        myRef.child("bookid").setValue(message.getBookId());
+        myRef.child("receiverid").setValue(message.getReceiverId());
+        myRef.child("senderid").setValue(message.getSenderId());
+        myRef.child("text").setValue(message.getText());
+        myRef.child("timestamp").setValue(message.getTimeStamp());
+
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.i(TAG, "sendMessageToDatabase, onDataChange");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(TAG, databaseError.getMessage());
+            }
+        });
+
+    }
 } //end of class

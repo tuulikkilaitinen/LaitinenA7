@@ -33,6 +33,13 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
     private boolean haveDate = false;
     private String sendMessage = "";
     private MyCustomEditTextListener myCustomEditTextListener;
+    //information for the last message:
+    //set all the information to holder to be saved
+    //since it is needed for doing new MyMessage
+    private  String id = "";
+    private  String bookId = "";
+    private  String senderId = "";
+    private  String receiverId = "";
 
     public MyChatRecyclerViewAdapter(ArrayList<MyMessage> items, OnChatMessageFragmentInteractionListener listener) {
         mValues = items;
@@ -182,6 +189,16 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
         public final TextView mContentTime;
         public final EditText mEditText;
         public final Button mSendButton;
+        //set all the information to holder to be saved
+        //since it is needed for doing new MyMessage
+        /*
+        public final String id;
+        public final String bookId;
+        public final String senderId;
+        public final String receiverId;
+        public final boolean isMeSender;
+        */
+
         public MyCustomEditTextListener myCustomEditTextListener;
 
         public ViewHolder(View view, MyCustomEditTextListener myCustomEditTextListener) {
@@ -193,16 +210,43 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
             mEditText = (EditText) view.findViewById(R.id.editChatText);
             mSendButton = (Button) view.findViewById(R.id.buttonSend);
 
+            //default values
+            /*
+            id = ""; //message id, received later.....
+            bookId = "";
+            senderId = "";
+            receiverId = "";
+            isMeSender = true; //default value*/
+
             mEditText.addTextChangedListener(myCustomEditTextListener);
 
             //add onclicklistener
             mSendButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onSendButtonPressed(MessageEnum.CHAT, sendMessage);
+
+                    Calendar calendar = Calendar.getInstance();
+                    long timeInMillis = calendar.getTimeInMillis();
+                    MyMessage sendChatMessage = new MyMessage (
+                            "",
+                            String.valueOf(timeInMillis),
+                            sendMessage,
+                            mValues.get(mValues.size()-1).getBookId(),
+                            senderId, //"", so fill up later
+                            receiverId, //"", so fill up later
+                            true //isMeSender is true
+                    );
+                    onSendButtonPressed(MessageEnum.SEND_CHAT_MESSAGE, sendChatMessage);
                 }
             });
-
+/*    public MyMessage(
+            String id,
+            String timestamp,
+            String text,
+            String bookId,
+            String senderId,
+            String receiverId,
+            boolean isMeSender) {*/
 
         }
 
@@ -212,7 +256,7 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
          }
     }
 
-    private void onSendButtonPressed(MessageEnum chat, String sendMessage) {
+    private void onSendButtonPressed(MessageEnum chat, MyMessage sendMessage) {
 
         if (mListener != null) {
             mListener.onChatMessageFragmentInteraction(chat, sendMessage);

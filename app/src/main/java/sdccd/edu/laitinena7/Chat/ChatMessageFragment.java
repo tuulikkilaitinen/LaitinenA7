@@ -52,10 +52,7 @@ public class ChatMessageFragment extends Fragment {
 
         Bundle data = getArguments();
         items = (ArrayList<MyMessage>) data.getSerializable("Messages");
-
-
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
