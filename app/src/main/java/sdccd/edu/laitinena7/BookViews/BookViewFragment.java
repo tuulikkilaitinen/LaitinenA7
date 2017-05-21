@@ -68,6 +68,7 @@ public class BookViewFragment extends Fragment {
         //book = (Book) extras.getSerializable("Book");
         //Bundle data = savedInstanceState.getBundle("Book");
         book = (Book) data.getSerializable("Book");
+        //hide search
 
 
     }

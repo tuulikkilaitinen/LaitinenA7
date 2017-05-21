@@ -1,6 +1,9 @@
 package sdccd.edu.laitinena7.MainApplication;
 
 import android.app.FragmentTransaction;
+import android.app.SearchManager;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -8,6 +11,7 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,10 +59,13 @@ public class AfterLoginActivity extends AppCompatActivity
     private BookListFragment bookListFragment;
     private static final String TAG = "AfterLoginActivity";
 
-    private StatusEnum status;
+    private StatusEnum status = StatusEnum.STARTED_APP;
     private Book selectedBook;
     private ChatMessageFragment chatMessageFragment;
     private String receiverId = "";
+    private Menu menu;
+    private ArrayList<Book> latestBookList;
+    private ArrayList<Book> searchBookList;
 
 
     @Override
@@ -110,6 +117,15 @@ public class AfterLoginActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        if (this.menu != null) {
+            this.menu.findItem(R.id.menu_search).setVisible(true);
+        }
+
+    }
+
     // show menu if app is running on a phone or a portrait-oriented tablet
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -120,11 +136,56 @@ public class AfterLoginActivity extends AppCompatActivity
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             // inflate the menu
             getMenuInflater().inflate(R.menu.menu_main, menu);
+            this.menu = menu;
+            // Get the SearchView and set the searchable configuration
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+
+            // Assumes current activity is the searchable activity
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+            searchView.setOnQueryTextListener(queryTextListener);
             return true;
         }
         else
             return false;
     }
+
+    final SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            // Do something
+            //check if empty
+            if (newText.isEmpty()) {
+                //show the whole list again
+                //set book list status
+                AfterLoginActivity.this.status = StatusEnum.STARTED_BOOK_LIST;
+                AfterLoginActivity.this.databaseHandler.getBookList();
+            }
+            return true;
+        }
+
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            // Do something
+            //search book list and return where string is find
+            if (AfterLoginActivity.this.latestBookList != null) {
+                searchBookList = new ArrayList<>();
+
+                for (Book book : AfterLoginActivity.this.latestBookList) {
+                    //str1.toLowerCase().contains(str2.toLowerCase())
+                    if (book.getName().toLowerCase().contains(query.toLowerCase())) {
+                        //add to search book list
+                        searchBookList.add(book);
+                    }
+                }
+                //set books to book list view
+                AfterLoginActivity.this.bookListFragment.setBooks(searchBookList);
+            }
+            return true;
+        }
+    };
+
 
     private void startMySettingsActivity() {
 
@@ -186,12 +247,17 @@ public class AfterLoginActivity extends AppCompatActivity
                 startMySettingsActivity();
             }
         } else if (message == MessageEnum.GET_BOOKS ) {
-            if(status != StatusEnum.STARTED_BOOK_LIST) {
+            Log.i(TAG, status.toString());
+            Log.i(TAG, StatusEnum.STARTED_BOOK_LIST.toString());
+
+            if(!status.equals(StatusEnum.STARTED_BOOK_LIST)) {
                 status = StatusEnum.STARTED_BOOK_LIST;
-                startBookListFragment((ArrayList<Book>) result);
+                latestBookList = (ArrayList<Book>) result;
+                startBookListFragment(latestBookList);
             }
             else {
-                getBookListFragment().setBooks((ArrayList<Book>) result);
+                latestBookList = (ArrayList<Book>) result;
+                this.bookListFragment.setBooks((ArrayList<Book>) result);
             }
         } else if (message == MessageEnum.GET_MESSAGES) {
             //check status
@@ -219,21 +285,23 @@ public class AfterLoginActivity extends AppCompatActivity
 
         //update application status
         status = StatusEnum.STARTED_BOOK_LIST;
+        //set visible search from menu
+        this.menu.findItem(R.id.menu_search).setVisible(true);
 
         //open book view fragment
         //create bundle for fragment
         Bundle data = new Bundle();
         data.putSerializable("Books", books);
         // Create new fragment and transaction
-        BookListFragment bookListFragment = new BookListFragment();
+        this.bookListFragment = new BookListFragment();
         //set arguments/bundle to fragment
-        bookListFragment.setArguments(data);
+        this.bookListFragment.setArguments(data);
         // consider using Java coding conventions (upper first char class names!!!)
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack
-        transaction.replace(R.id.activityAfterLoginId, bookListFragment);
+        transaction.replace(R.id.activityAfterLoginId, this.bookListFragment);
         transaction.addToBackStack(null);
 
         // Commit the transaction
@@ -264,6 +332,8 @@ public class AfterLoginActivity extends AppCompatActivity
 
         //update application status
         status = StatusEnum.STARTED_CHAT_MESSAGE;
+        //hide search from menu
+        this.menu.findItem(R.id.menu_search).setVisible(false);
 
         //open book view fragment
         //create bundle for fragment
@@ -294,6 +364,8 @@ public class AfterLoginActivity extends AppCompatActivity
     private void startBookViewFragment(Book book) {
 
         status = StatusEnum.STARTED_BOOK_VIEW;
+        //hide search from menu
+        this.menu.findItem(R.id.menu_search).setVisible(false);
 
         //open book view fragment
         //create bundle for fragment
@@ -318,12 +390,12 @@ public class AfterLoginActivity extends AppCompatActivity
     // gets a reference to the BookListFragment
     private BookListFragment getBookListFragment() {
 
-        BookListFragment bookListFragment = (BookListFragment)
+        this.bookListFragment = (BookListFragment)
                 getFragmentManager().findFragmentById(R.id.bookListFragment);
 
         //return (BookListFragment) getSupportFragmentManager().findFragmentById(
                // R.id.fragment_book_list);
-        return bookListFragment;
+        return this.bookListFragment;
     }
 
     private ChatMessageFragment getChatMessageFragment() {
