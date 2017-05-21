@@ -335,7 +335,7 @@ public class AfterLoginActivity extends AppCompatActivity
 
     @Override
     public void onChatMessageFragmentInteraction(MessageEnum message, Object result) {
-        //TODO WHAT HAPPENS HERE
+        System.out.println (result);
 
     }
     //public Object getBookList() {

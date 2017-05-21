@@ -51,8 +51,6 @@ public class ChatMessageFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         Bundle data = getArguments();
-        //book = (Book) extras.getSerializable("Book");
-        //Bundle data = savedInstanceState.getBundle("Book");
         items = (ArrayList<MyMessage>) data.getSerializable("Messages");
 
 
