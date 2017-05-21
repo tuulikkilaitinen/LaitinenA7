@@ -6,5 +6,5 @@ package sdccd.edu.laitinena7.Utils;
 
 public enum StatusEnum {
 
-    STARTED_CHAT_MESSAGE
+    STARTED_BOOK_LIST, STARTED_BOOK_VIEW, STARTED_CHAT_MESSAGE
 }

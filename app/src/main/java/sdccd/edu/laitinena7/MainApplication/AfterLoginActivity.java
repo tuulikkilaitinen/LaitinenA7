@@ -182,7 +182,12 @@ public class AfterLoginActivity extends AppCompatActivity
                 startMySettingsActivity();
             }
         } else if (message == MessageEnum.GET_BOOKS ) {
-            getBookListFragment().setBooks((ArrayList<Book>)result);
+            if(status != StatusEnum.STARTED_BOOK_LIST) {
+                startBookListFragment((ArrayList<Book>) result);
+            }
+            else {
+                getBookListFragment().setBooks((ArrayList<Book>) result);
+            }
         } else if (message == MessageEnum.GET_MESSAGES) {
             //check status
             if (status != StatusEnum.STARTED_CHAT_MESSAGE) {
@@ -203,6 +208,31 @@ public class AfterLoginActivity extends AppCompatActivity
         Log.i(TAG, "timeInMillis: "+ Long.valueOf(timeInMillis));
 
 
+    }
+
+    private void startBookListFragment(ArrayList<Book> books) {
+
+        //update application status
+        status = StatusEnum.STARTED_BOOK_LIST;
+
+        //open book view fragment
+        //create bundle for fragment
+        Bundle data = new Bundle();
+        data.putSerializable("Books", books);
+        // Create new fragment and transaction
+        BookListFragment bookListFragment = new BookListFragment();
+        //set arguments/bundle to fragment
+        bookListFragment.setArguments(data);
+        // consider using Java coding conventions (upper first char class names!!!)
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack
+        transaction.replace(R.id.activityAfterLoginId, bookListFragment);
+        transaction.addToBackStack(null);
+
+        // Commit the transaction
+        transaction.commit();
     }
 
     private void startChatMessageFragment(ArrayList<MyMessage> messages) {
@@ -238,6 +268,8 @@ public class AfterLoginActivity extends AppCompatActivity
 
     private void startBookViewFragment(Book book) {
 
+        status = StatusEnum.STARTED_BOOK_VIEW;
+
         //open book view fragment
         //create bundle for fragment
         Bundle data = new Bundle();
@@ -262,7 +294,7 @@ public class AfterLoginActivity extends AppCompatActivity
     private BookListFragment getBookListFragment() {
 
         BookListFragment bookListFragment = (BookListFragment)
-                getSupportFragmentManager().findFragmentById(R.id.bookListFragment);
+                getFragmentManager().findFragmentById(R.id.bookListFragment);
 
         //return (BookListFragment) getSupportFragmentManager().findFragmentById(
                // R.id.fragment_book_list);

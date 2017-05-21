@@ -49,19 +49,19 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
 
         holder.mContentDate.setText(mYear+" "+mMonth+" "+mDay);
         holder.mContentMessage.setText(mValues.get(position).getText());
-        holder.mContentTime.setText(mTime);
+        //holder.mContentTime.setText(mTime);
 
         //if message not from this user, push message and time
         // to right side of screen with gravity
         if (!mValues.get(position).getIsMeSender()) {
             holder.mContentMessage.setGravity(Gravity.RIGHT);
-            holder.mContentTime.setGravity(Gravity.RIGHT);
+            //holder.mContentTime.setGravity(Gravity.RIGHT);
 
         }
         else {
             //else they go left
             holder.mContentMessage.setGravity(Gravity.LEFT);
-            holder.mContentTime.setGravity(Gravity.LEFT);
+           // holder.mContentTime.setGravity(Gravity.LEFT);
         }
 
         /* !!!! You can't click chat messages!!
@@ -99,20 +99,20 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
         public final View mView;
         public final TextView mContentDate;
         public final TextView mContentMessage;
-        public final TextView mContentTime;
+        //public final TextView mContentTime;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
             mContentDate = (TextView) view.findViewById(R.id.contentDate);
             mContentMessage = (TextView) view.findViewById(R.id.contentMessage);
-            mContentTime = (TextView) view.findViewById(R.id.contentTime);
+            //mContentTime = (TextView) view.findViewById(R.id.contentTime);
 
         }
 
-        //@Override
-        //public String toString() {
-        //return super.toString() + " '" + mContentView.getText() + "'";
-        // }//
+        @Override
+        public String toString() {
+            return super.toString();
+         }
     }
 } //end of class

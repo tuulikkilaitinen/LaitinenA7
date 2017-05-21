@@ -1,10 +1,12 @@
 package sdccd.edu.laitinena7.Utils;
 
+import java.io.Serializable;
+
 /**
  * Created by Tuulikki Laitinen on 5/18/2017.
  */
 
-public class User {
+public class User implements Serializable {
 
     private String id;
     private String name;

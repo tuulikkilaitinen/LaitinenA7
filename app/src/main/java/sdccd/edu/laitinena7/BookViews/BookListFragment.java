@@ -1,8 +1,8 @@
 package sdccd.edu.laitinena7.BookViews;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -53,41 +53,23 @@ public class BookListFragment extends Fragment {
     private Context context;
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        Bundle data = getArguments();
+        //book = (Book) extras.getSerializable("Book");
+        //Bundle data = savedInstanceState.getBundle("Book");
+        items = (ArrayList<Book>) data.getSerializable("Books");
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_book_list, container, false);
 
-
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.bookListRecyclerView);
-        //mRecyclerView.setTag();
-
-        // Initialize dataset, this data would usually come from a local content provider or
-        // remote server.
-        //initDataset();
 
 
-
-        // LinearLayoutManager is used here, this will layout the elements in a similar fashion
-        // to the way ListView would layout elements. The RecyclerView.LayoutManager defines how
-        // elements are laid out.
-        //mLayoutManager = new LinearLayoutManager(getActivity());
-
-        //mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
-        /*
-        mLayoutManager = new LinearLayoutManager(getActivity());
-
-        mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
-        setRecyclerViewLayoutManager(mCurrentLayoutManagerType);
-        */
-
-        items = new ArrayList<Book>();
-        /*
-        for(int i = 0; i != 20; i++) {
-            Book book = new Book ();
-            book.setName(String.valueOf(i));
-            book.setPrice(String.valueOf(i));
-            items.add(book);
-        }*/
         mAdapter = new MyBookRecyclerViewAdapter(items, mListener);
         // Set the adapter
         if (mRecyclerView instanceof RecyclerView) {

@@ -1,10 +1,12 @@
 package sdccd.edu.laitinena7.Utils;
 
+import java.io.Serializable;
+
 /**
  * Created by Tuulikki Laitinen on 5/19/2017.
  */
 
-public class MyMessage {
+public class MyMessage implements Serializable {
 
     private String id;
     private String timestamp;

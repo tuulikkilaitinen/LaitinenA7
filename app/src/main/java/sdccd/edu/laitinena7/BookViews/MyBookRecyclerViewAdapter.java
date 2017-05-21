@@ -81,8 +81,8 @@ public class MyBookRecyclerViewAdapter extends RecyclerView.Adapter<MyBookRecycl
         }
 
        //@Override
-        //public String toString() {
-            //return super.toString() + " '" + mContentView.getText() + "'";
-       // }//
+        public String toString() {
+            return super.toString();
+        }
     }
 }
