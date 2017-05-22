@@ -474,7 +474,7 @@ public class DatabaseHandler {
 
         Bitmap bitmap = book.getBitmap();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 500, baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
 
         UploadTask uploadTask = imageFileReference.putBytes(data);
