@@ -13,6 +13,7 @@ import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -121,6 +122,7 @@ public class AfterLoginActivity extends AppCompatActivity
         super.onResume();
         if (this.menu != null) {
             this.menu.findItem(R.id.menu_search).setVisible(true);
+            this.menu.findItem(R.id.add_book).setVisible(true);
         }
 
     }
@@ -274,7 +276,8 @@ public class AfterLoginActivity extends AppCompatActivity
             }
             else {
                 latestBookList = (ArrayList<Book>) result;
-                this.bookListFragment.setBooks((ArrayList<Book>) result);
+                startBookListFragment(latestBookList);
+                //this.bookListFragment.setBooks((ArrayList<Book>) result);
             }
         } else if (message == MessageEnum.GET_MESSAGES) {
             //check status
@@ -304,11 +307,18 @@ public class AfterLoginActivity extends AppCompatActivity
            // getChatMessageFragment().setMessages((ArrayList<MyMessage>)result);
         }
         else if (message == MessageEnum.BOOK_ADDED) {
-            if (status == StatusEnum.STARTED_BOOK_LIST) {
-                //get book list from database
-                databaseHandler.getBookList();
 
-            }
+            //send book image then to firebase storage
+            databaseHandler.sendBookImage((Book)result);
+        }
+        else if (message == MessageEnum.IMAGE_LOADED) {
+            //back to booklist
+            databaseHandler.getBookList();
+        }
+        else if (message == MessageEnum.IMAGE_DOWNLOADED) {
+            //now open bookviewfragment
+            startBookViewFragment((Book)result);
+
         }
 
 
@@ -387,6 +397,7 @@ public class AfterLoginActivity extends AppCompatActivity
         status = StatusEnum.STARTED_CHAT_MESSAGE;
         //hide search from menu
         this.menu.findItem(R.id.menu_search).setVisible(false);
+        this.menu.findItem(R.id.add_book).setVisible(false);
 
         //open book view fragment
         //create bundle for fragment
@@ -411,7 +422,9 @@ public class AfterLoginActivity extends AppCompatActivity
     @Override
     public void onListFragmentInteraction(MessageEnum message, Book book) {
         this.selectedBook = book; //save information
-        startBookViewFragment(book);
+
+        //get image from database
+        databaseHandler.getBookImage(book);
     }
 
     private void startBookViewFragment(Book book) {
@@ -419,6 +432,7 @@ public class AfterLoginActivity extends AppCompatActivity
         status = StatusEnum.STARTED_BOOK_VIEW;
         //hide search from menu
         this.menu.findItem(R.id.menu_search).setVisible(false);
+        this.menu.findItem(R.id.add_book).setVisible(false);
 
         //open book view fragment
         //create bundle for fragment
@@ -446,6 +460,7 @@ public class AfterLoginActivity extends AppCompatActivity
         //status = StatusEnum.STARTED_ADD_BOOK;
         //hide search from menu
         this.menu.findItem(R.id.menu_search).setVisible(false);
+        this.menu.findItem(R.id.add_book).setVisible(false);
 
         // Create new fragment and transaction
         AddBookFragment addBookFragment = new AddBookFragment();
@@ -495,7 +510,12 @@ public class AfterLoginActivity extends AppCompatActivity
             ((Book)result).setOwnderId(user.getUserId());
             ((Book)result).setOwnerName(user.getUserName());
             ((Book)result).setOwnerLocation(user.getUserLocation());
+            //first send book information without image,
+            //wait for answer and then send image to firebase storage!!
             databaseHandler.sendBookToDatabase((Book)result);
+        }
+        else if (message == MessageEnum.GET_BOOK_IMAGE) {
+            databaseHandler.getBookImage((Book)result);
         }
         else {
 

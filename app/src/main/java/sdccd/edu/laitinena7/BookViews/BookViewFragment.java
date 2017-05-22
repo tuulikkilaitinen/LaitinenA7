@@ -90,6 +90,10 @@ public class BookViewFragment extends Fragment {
 
         //set up image and text
         imageView = (ImageView)view.findViewById(R.id.imageViewBook);
+        //we have the book image, let's set it
+        imageView.setImageBitmap(book.getBitmap());
+
+
         textView = (TextView) view.findViewById(R.id.textViewBook);
         textView.setText("Title: "      +    book.getName()      + "\n" +
                          "Author: "     +    book.getAuthor()    + "\n" +
@@ -112,7 +116,13 @@ public class BookViewFragment extends Fragment {
         return view;
     }
 
-    public void onButtonPressed(MessageEnum message, Book book) {
+    private void sendMessageToMyListener (MessageEnum message, Book book) {
+        if (mListener != null) {
+            mListener.onFragmentInteraction(message, book);
+        }
+    }
+
+    private void onButtonPressed(MessageEnum message, Book book) {
         if (mListener != null) {
             mListener.onFragmentInteraction(message, book);
         }

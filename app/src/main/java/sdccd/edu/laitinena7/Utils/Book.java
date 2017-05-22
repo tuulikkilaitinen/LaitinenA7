@@ -1,5 +1,8 @@
 package sdccd.edu.laitinena7.Utils;
 
+import android.graphics.Bitmap;
+import android.net.Uri;
+
 import java.io.Serializable;
 
 /**
@@ -16,7 +19,8 @@ public class Book implements Serializable {
     private String ownerId;
     private String ownerName;
     private String ownerLocation;
-    private String imagePath;
+    private Uri    imagePath;
+    private Bitmap bitmap;
 
     public Book () {}
 
@@ -28,7 +32,8 @@ public class Book implements Serializable {
                  String ownerId,
                  String ownerName,
                  String ownerLocation,
-                 String imagePath) {
+                 Uri imagePath,
+                 Bitmap bitmap) {
 
         this.id = id;
         this.name = name;
@@ -39,6 +44,7 @@ public class Book implements Serializable {
         this.ownerName = ownerName;
         this.ownerLocation = ownerLocation;
         this.imagePath = imagePath;
+        this.bitmap = bitmap;
     }
 
     public String getName() {
@@ -95,5 +101,17 @@ public class Book implements Serializable {
 
     public String getOwnerLocation() {
         return ownerLocation;
+    }
+
+    public Uri getUri() {
+        return imagePath;
+    }
+
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
     }
 }

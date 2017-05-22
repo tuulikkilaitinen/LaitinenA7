@@ -1,17 +1,36 @@
 package sdccd.edu.laitinena7.Database;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteCursorDriver;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.ImageView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import sdccd.edu.laitinena7.MainApplication.AfterLoginActivity;
 import sdccd.edu.laitinena7.Utils.Book;
 import sdccd.edu.laitinena7.Utils.MessageEnum;
 import sdccd.edu.laitinena7.Utils.MyMessage;
@@ -145,7 +164,8 @@ public class DatabaseHandler {
                             ds.child("ownerid").getValue().toString(),
                             ds.child("ownername").getValue().toString(),
                             ds.child("ownerlocation").getValue().toString(),
-                            null //for image path now
+                            null, //for image path now
+                            null //for bitmap for now
                     ));
 
                 }
@@ -390,6 +410,8 @@ public class DatabaseHandler {
 
     public void sendBookToDatabase(Book book) {
 
+        final Book sentBook = book;
+
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         //https://laitinena7-55fef.firebaseio.com/
         DatabaseReference myRef1 = database.getReference().child("books");
@@ -422,7 +444,8 @@ public class DatabaseHandler {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.i(TAG, "sendBookToDatabase, onDataChange");
-                sendMessage(MessageEnum.BOOK_ADDED, null);
+                //send back book that was sent to database
+                sendMessage(MessageEnum.BOOK_ADDED, sentBook);
             }
 
             @Override
@@ -431,5 +454,113 @@ public class DatabaseHandler {
             }
         });
     }
+
+    public void sendBookImage(Book book) {
+
+        final Book usedBook = book;
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        // Create a storage reference from our app
+        StorageReference storageReference = storage.getReference();
+
+        // Create a reference to image file
+        //StorageReference imageFileReference = storageReference.child(getFileNameFromUri(book.getUri()));
+        StorageReference imageFileReference = storageReference.child(book.getName()+".png");
+        // Create a reference to 'images/mountains.jpg'
+       //StorageReference mountainImagesRef = storageRef.child("images/mountains.jpg");
+
+// While the file names are the same, the references point to different files
+        //mountainsRef.getName().equals(mountainImagesRef.getName());    // true
+        //mountainsRef.getPath().equals(mountainImagesRef.getPath());    // false
+
+        Bitmap bitmap = book.getBitmap();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 500, baos);
+        byte[] data = baos.toByteArray();
+
+        UploadTask uploadTask = imageFileReference.putBytes(data);
+
+        //uploadTask = storageRef.child("images/mountains.jpg").putFile(file, metadata);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                //send information to afterloginactivity
+                sendMessage(MessageEnum.IMAGE_LOADED, usedBook);
+            }
+        });
+
+    }
+
+    public void getBookImage(Book book) {
+
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+
+        // Create a storage reference from our app
+        StorageReference storageRef = storage.getReference();
+
+        //StorageReference imageRef = storageRef.child(getFileNameFromUri(book.getUri()));
+        StorageReference imageRef = storageRef.child(book.getName()+".png");
+
+        File localFile = null;
+        try {
+            localFile = File.createTempFile(book.getName(), "png");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        final File useThisFile = localFile;
+        final Book useThisBook = book;
+        imageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                // Local temp file has been created
+                //send it forward
+                String filePath = useThisFile.getPath();
+                Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+                useThisBook.setBitmap(bitmap);
+                sendMessage(MessageEnum.IMAGE_DOWNLOADED, useThisBook);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+            }
+        });
+
+    }
+
+    //helper function
+    private String getFileNameFromUri (Uri uri) {
+
+        String fileName = "";
+        if (uri.getScheme().equals("file")) {
+            fileName = uri.getLastPathSegment();
+        } else {
+            Cursor cursor = null;
+            try {
+                cursor = ((AfterLoginActivity)listener).getContentResolver().query(uri, new String[]{
+                        MediaStore.Images.ImageColumns.DISPLAY_NAME
+                }, null, null, null);
+
+                if (cursor != null && cursor.moveToFirst()) {
+                    fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DISPLAY_NAME));
+                    Log.d(TAG, "name is " + fileName);
+                }
+            } finally {
+
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
+        return fileName;
+    }
+
 
 } //end of class
