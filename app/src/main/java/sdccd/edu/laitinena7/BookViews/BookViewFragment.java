@@ -96,6 +96,8 @@ public class BookViewFragment extends Fragment {
                          "Year: "       +    book.getYear()      + "\n" +
                          "Price: "      +"$"+book.getPrice()     + "\n"
                         );
+
+
         //get button and attach listener
         chatButton = (Button)view.findViewById(R.id.buttonBook);
         chatButton.setOnClickListener(new View.OnClickListener() {

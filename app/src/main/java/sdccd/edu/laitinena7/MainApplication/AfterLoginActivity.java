@@ -283,10 +283,32 @@ public class AfterLoginActivity extends AppCompatActivity
                 startChatMessageFragment((ArrayList<MyMessage>) result);
             }
             else {
+
+                //if messages is empty
+                if (((ArrayList<MyMessage>)result).size() == 0) {
+                    MyMessage message2 = new MyMessage(
+                            " ", " ", " ", " ", " ", " ", false );
+
+                    //if book is sender's book
+                    if (this.userId.equals(this.selectedBook.getOwnerId())) {
+                        //set message to message field not to add edittext field
+                        message2.setText("MessageEnum.USER_OWNER");
+                    }
+
+                    ((ArrayList<MyMessage>)result).add(message2);
+                }
+
                 //else set up messages to view
                 chatMessageFragment.setMessages((ArrayList<MyMessage>)result);
             }
            // getChatMessageFragment().setMessages((ArrayList<MyMessage>)result);
+        }
+        else if (message == MessageEnum.BOOK_ADDED) {
+            if (status == StatusEnum.STARTED_BOOK_LIST) {
+                //get book list from database
+                databaseHandler.getBookList();
+
+            }
         }
 
 
@@ -345,6 +367,20 @@ public class AfterLoginActivity extends AppCompatActivity
         }
         else {
             this.receiverId = this.selectedBook.getOwnerId();
+        }
+
+        //if messages is empty
+        if (messages.size() == 0) {
+            MyMessage message = new MyMessage(
+                    " ", " ", " ", " ", " ", " ", false );
+
+            //if book is sender's book
+            if (this.userId.equals(this.selectedBook.getOwnerId())) {
+                //set message to message field not to add edittext field
+                message.setText("MessageEnum.USER_OWNER");
+            }
+
+            messages.add(message);
         }
 
         //update application status
@@ -406,7 +442,8 @@ public class AfterLoginActivity extends AppCompatActivity
 
     private void startAddBookFragment() {
 
-        status = StatusEnum.STARTED_ADD_BOOK;
+        //dont' use now....
+        //status = StatusEnum.STARTED_ADD_BOOK;
         //hide search from menu
         this.menu.findItem(R.id.menu_search).setVisible(false);
 
@@ -458,6 +495,7 @@ public class AfterLoginActivity extends AppCompatActivity
             ((Book)result).setOwnderId(user.getUserId());
             databaseHandler.sendBookToDatabase((Book)result);
         }
+        else {
 
         //if buyer, open chat view with owner
         //TODO else if owner, open chat view list with list of buyers
@@ -472,6 +510,7 @@ public class AfterLoginActivity extends AppCompatActivity
             //TODO open with list of buyers.....
             databaseHandler.getBookMessages((Book)result, this.user);
         }
+        }
 
     }
 
@@ -480,6 +519,7 @@ public class AfterLoginActivity extends AppCompatActivity
         //fill up the rest of the message
         ((MyMessage)result).setSenderId(this.user.getUserId());
         ((MyMessage)result).setReceiverId(this.receiverId);
+        ((MyMessage)result).setBookId(this.selectedBook.getBookId());
         //send message to message list
         databaseHandler.sendMessageToDatabase((MyMessage)result);
         //message should come back with reference change?

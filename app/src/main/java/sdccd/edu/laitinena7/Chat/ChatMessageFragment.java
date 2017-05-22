@@ -127,6 +127,15 @@ public class ChatMessageFragment extends Fragment {
     public void setMessages (ArrayList<MyMessage> myMessages) {
         items = myMessages;
 
+        //set empty message
+        if (myMessages.size() == 0) {
+            MyMessage message = new MyMessage(
+                    " ", " ", " ", " ", " ", " ", false
+            );
+
+            myMessages.add(message);
+        }
+
         mAdapter.setMessages(myMessages);
     }
 

@@ -65,47 +65,65 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
 
-        long timeStamp = Long.parseLong(mValues.get(position).getTimeStamp());
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(timeStamp);
+        //check first if message is empty......
+        if (mValues.get(position).getTimeStamp() != " " &&
+                mValues.get(position).getTimeStamp() != "") {
 
-        String mYear = Integer.toString(calendar.get(Calendar.YEAR));
-        //String mMonth = Integer.toString(calendar.get(Calendar.MONTH));
-        String mMonth = getMonthForInt(Calendar.MONTH);
-        String mDay = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
-        String mTime = Integer.toString(calendar.get(Calendar.HOUR)) +
-                       ":" +
-                       Integer.toString(calendar.get(Calendar.SECOND));
+            long timeStamp = Long.parseLong(mValues.get(position).getTimeStamp());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(timeStamp);
+
+            String mYear = Integer.toString(calendar.get(Calendar.YEAR));
+            //String mMonth = Integer.toString(calendar.get(Calendar.MONTH));
+            String mMonth = getMonthForInt(Calendar.MONTH);
+            String mDay = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
+            String mTime = Integer.toString(calendar.get(Calendar.HOUR)) +
+                    ":" +
+                    Integer.toString(calendar.get(Calendar.SECOND));
 
 
-        //holder.mContentDate.setText(mYear+" "+mMonth+" "+mDay);
-        //check if chats have this, if they have it, just hide it
-        if (!haveDate) {
-            holder.mContentDate.setText(mMonth + " " + mDay + ", " + mYear);
-            haveDate = true;
-            previousDate = mMonth + " " + mDay + ", " + mYear;
-            holder.mContentDate.setVisibility(View.VISIBLE);
-        }
-        else if (!previousDate.equals(mMonth + " " + mDay + ", " + mYear)) {
-            holder.mContentDate.setText(mMonth + " " + mDay + ", " + mYear);
-            previousDate = mMonth + " " + mDay + ", " + mYear;
-            holder.mContentDate.setVisibility(View.VISIBLE);
-        }
-        else {
-            holder.mContentDate.setVisibility(View.GONE);
-        }
-        holder.mContentMessage.setText(mValues.get(position).getText());
-        holder.mContentTime.setText(mTime);
+            //holder.mContentDate.setText(mYear+" "+mMonth+" "+mDay);
+            //check if chats have this, if they have it, just hide it
+            if (!haveDate) {
+                holder.mContentDate.setText(mMonth + " " + mDay + ", " + mYear);
+                haveDate = true;
+                previousDate = mMonth + " " + mDay + ", " + mYear;
+                holder.mContentDate.setVisibility(View.VISIBLE);
+            } else if (!previousDate.equals(mMonth + " " + mDay + ", " + mYear)) {
+                holder.mContentDate.setText(mMonth + " " + mDay + ", " + mYear);
+                previousDate = mMonth + " " + mDay + ", " + mYear;
+                holder.mContentDate.setVisibility(View.VISIBLE);
+            } else {
+                holder.mContentDate.setVisibility(View.GONE);
+            }
+            holder.mContentMessage.setText(mValues.get(position).getText());
+            holder.mContentTime.setText(mTime);
+
+            holder.mEditText.setText(sendMessage);
+        } //not empty message
 
         //if this is not the last, remove textedit and buttons
         if (position != mValues.size()-1) {
             holder.mEditText.setVisibility(View.GONE);
             holder.mSendButton.setVisibility(View.GONE);
         }
-        //else show
-        else {
+        //else show if message not empty and not user_owner
+        //MessageEnum.USER_OWNER
+        else if (mValues.get(position).getTimeStamp() != " " &&
+                mValues.get(position).getTimeStamp() != "" &&
+                !mValues.get(position).getText().equals("MessageEnum.USER_OWNER")
+                ){
             holder.mEditText.setVisibility(View.VISIBLE);
             holder.mSendButton.setVisibility(View.VISIBLE);
+        }
+        else if ((mValues.get(position).getTimeStamp() == " " ||
+                mValues.get(position).getTimeStamp() == "") &&
+                mValues.get(position).getText().equals("MessageEnum.USER_OWNER")) {
+
+            holder.mEditText.setVisibility(View.GONE);
+            holder.mSendButton.setVisibility(View.GONE);
+            //set message that no messages...
+            holder.mContentMessage.setText("NO MESSAGES");
         }
 
         //if message not from this user, push message and time
@@ -124,28 +142,12 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
            // holder.mContentTime.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
         }
 
-        /* !!!! You can't click chat messages!!
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    //return message about book selected and return the book object.
-                    mListener.onChatListFragmentInteraction(
-                            null,null);
-
-                            //MessageEnum.BOOK_SELECTED,
-                            //MyChatRecyclerViewAdapter.this.mValues.get(position));
-                }
-            }
-        });*/
         // update MyCustomEditTextListener every time we bind a new item
         // so that it knows what item in mDataset to update
         int adapterPosition = holder.getAdapterPosition();
         //holder.myCustomEditTextListener.updatePosition(adapterPosition);
         myCustomEditTextListener.updatePosition(adapterPosition);
-        holder.mEditText.setText(sendMessage);
+
     }
 
     // we make TextWatcher to be aware of the position it currently works with
@@ -193,6 +195,14 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
     public void setMessages(ArrayList<MyMessage> myMessages) {
 
         mValues.clear();
+        //test
+        if (myMessages.size() == 0)  {
+            MyMessage message = new MyMessage(
+                    " ", " ", " ", " ", " ", " ", false
+
+            );
+            myMessages.add(message);
+        }
         mValues.addAll(myMessages);
 
         dataSetChanged();
@@ -249,6 +259,17 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
                 @Override
                 public void onClick(View v) {
 
+                    //if previous message didn't have timestamp,
+                    //it was decoy, so remove it....
+                    //check if there are any messages in list
+                    //if not, do nothing when pressing button
+                    if (mValues.size() > 0) {
+                    if (mValues.get(mValues.size()-1).getTimeStamp() == "" ||
+                            mValues.get(mValues.size()-1).getTimeStamp() == " ")
+                    {
+                        mValues.remove(mValues.size()-1);
+                    }
+
                     //check if message not empty
                     if (sendMessage != null && !sendMessage.isEmpty()
                             && !sendMessage.equals("")
@@ -257,16 +278,18 @@ public class MyChatRecyclerViewAdapter  extends RecyclerView.Adapter<MyChatRecyc
                         Calendar calendar = Calendar.getInstance();
                         long timeInMillis = calendar.getTimeInMillis();
                         MyMessage sendChatMessage = new MyMessage(
-                            "",
-                            String.valueOf(timeInMillis),
-                            sendMessage,
-                            mValues.get(mValues.size() - 1).getBookId(),
-                            senderId, //"", so fill up later
-                            receiverId, //"", so fill up later
-                            true //isMeSender is true
+                                "",
+                                String.valueOf(timeInMillis),
+                                sendMessage,
+                                "", //fill up later
+                                senderId, //"", so fill up later
+                                receiverId, //"", so fill up later
+                                true //isMeSender is true
                         );
+
                         onSendButtonPressed(MessageEnum.SEND_CHAT_MESSAGE, sendChatMessage);
                         mEditText.setText("");
+                    }
                     }
                 }
             });

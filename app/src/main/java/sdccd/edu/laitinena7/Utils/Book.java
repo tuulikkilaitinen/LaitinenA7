@@ -77,4 +77,8 @@ public class Book implements Serializable {
     public void setOwnderId(String ownerId) {
         this.ownerId = ownerId;
     }
+
+    public String getBookId() {
+        return id;
+    }
 }

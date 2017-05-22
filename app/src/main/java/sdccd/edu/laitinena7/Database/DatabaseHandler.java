@@ -253,7 +253,7 @@ public class DatabaseHandler {
                             timeStamp = DatabaseHandler.this.lastSentMessage.getTimeStamp();
                         }
                         */
-                        if (checkBook.getId().equals(bookId)) {
+                        if (checkBook != null && checkBook.getId().equals(bookId)) {
                             //check value for is me sender
 
                             if (checkUser.getUserId().equals(senderId)) {
@@ -273,10 +273,6 @@ public class DatabaseHandler {
                                                     );
                             messages.add(message);
                         }
-                        else {
-                            System.out.println("check book id: "+checkBook.getId());
-                            System.out.println ("ds.child bookid "+ds.child("bookid").getValue().toString());
-                        }
                     }
 
                     DatabaseHandler.this.sendMessage(MessageEnum.GET_MESSAGES, messages);
@@ -289,7 +285,7 @@ public class DatabaseHandler {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                System.out.println (databaseError.getMessage());
+                Log.i(TAG, databaseError.getMessage());
             }
         });
     }
@@ -376,6 +372,7 @@ public class DatabaseHandler {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.i(TAG, "sendMessageToDatabase, onDataChange");
+
             }
 
             @Override
@@ -418,6 +415,7 @@ public class DatabaseHandler {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.i(TAG, "sendBookToDatabase, onDataChange");
+                sendMessage(MessageEnum.BOOK_ADDED, null);
             }
 
             @Override
