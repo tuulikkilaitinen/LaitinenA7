@@ -126,20 +126,25 @@ public class DatabaseHandler {
                     //fill up book list
                     /*
                     *
-                public Book (String id,
-                 String name,
-                 String author,
-                 String year,
-                 String price,
-                 String ownerId)
+        this.id = id;
+        this.name = name;
+        this.author = author;
+        this.year = year;
+        this.price = price;
+        this.ownerId = ownerId;
+        this.ownerName = ownerName;
+        this.ownerLocation = ownerLocation;
+        this.imagePath = imagePath;
                     * */
-                    books.add(new Book (ds.getKey().toString(),
+                    books.add(new Book
+                            (ds.getKey().toString(),
                             ds.child("name").getValue().toString(),
                             ds.child("author").getValue().toString(),
                             ds.child("year").getValue().toString(),
                             ds.child("price").getValue().toString(),
                             ds.child("ownerid").getValue().toString(),
-                            null, //for owner name now
+                            ds.child("ownername").getValue().toString(),
+                            ds.child("ownerlocation").getValue().toString(),
                             null //for image path now
                     ));
 
@@ -402,6 +407,8 @@ public class DatabaseHandler {
         map2.put("ownerid", book.getOwnerId());
         map2.put("price", book.getPrice());
         map2.put("year", book.getYear());
+        map2.put("ownername", book.getOwnerName());
+        map2.put("ownerlocation", book.getOwnerLocation());
         //Firebase fire = new Firebase("********").child(markerName);
         myRef.setValue(map2);
 /*

@@ -15,6 +15,7 @@ public class Book implements Serializable {
     private String price;
     private String ownerId;
     private String ownerName;
+    private String ownerLocation;
     private String imagePath;
 
     public Book () {}
@@ -26,6 +27,7 @@ public class Book implements Serializable {
                  String price,
                  String ownerId,
                  String ownerName,
+                 String ownerLocation,
                  String imagePath) {
 
         this.id = id;
@@ -35,6 +37,7 @@ public class Book implements Serializable {
         this.price = price;
         this.ownerId = ownerId;
         this.ownerName = ownerName;
+        this.ownerLocation = ownerLocation;
         this.imagePath = imagePath;
     }
 
@@ -80,5 +83,17 @@ public class Book implements Serializable {
 
     public String getBookId() {
         return id;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
+    public void setOwnerLocation(String ownerLocation) {
+        this.ownerLocation = ownerLocation;
+    }
+
+    public String getOwnerLocation() {
+        return ownerLocation;
     }
 }

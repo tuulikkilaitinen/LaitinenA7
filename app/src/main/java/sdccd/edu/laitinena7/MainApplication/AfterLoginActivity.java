@@ -493,6 +493,8 @@ public class AfterLoginActivity extends AppCompatActivity
 
         if (message == MessageEnum.ADD_BOOK) {
             ((Book)result).setOwnderId(user.getUserId());
+            ((Book)result).setOwnerName(user.getUserName());
+            ((Book)result).setOwnerLocation(user.getUserLocation());
             databaseHandler.sendBookToDatabase((Book)result);
         }
         else {

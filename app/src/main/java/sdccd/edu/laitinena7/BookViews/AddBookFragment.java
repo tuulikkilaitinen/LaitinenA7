@@ -128,6 +128,7 @@ public class AddBookFragment extends Fragment {
                             price.getText().toString(),
                             null, //ownderid null for now
                             null, //owndername null for now
+                            null, //ownerlocation null for now
                             null //image path null for now
                     );
                     onButtonPressed(MessageEnum.ADD_BOOK, book);

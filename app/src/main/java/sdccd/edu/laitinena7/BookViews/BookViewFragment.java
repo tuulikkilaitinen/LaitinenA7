@@ -91,10 +91,12 @@ public class BookViewFragment extends Fragment {
         //set up image and text
         imageView = (ImageView)view.findViewById(R.id.imageViewBook);
         textView = (TextView) view.findViewById(R.id.textViewBook);
-        textView.setText("Name: "       +    book.getName()      + "\n" +
+        textView.setText("Title: "      +    book.getName()      + "\n" +
                          "Author: "     +    book.getAuthor()    + "\n" +
                          "Year: "       +    book.getYear()      + "\n" +
-                         "Price: "      +"$"+book.getPrice()     + "\n"
+                         "Price: "      +"$"+book.getPrice()     + "\n" +
+                         "Owner Name: " +    book.getOwnerName() + "\n" +
+                         "Owner Location: "+ book.getOwnerLocation() + "\n"
                         );
 
 
