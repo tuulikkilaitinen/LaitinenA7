@@ -1,9 +1,12 @@
 package sdccd.edu.laitinena7.BookViews;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +14,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 import sdccd.edu.laitinena7.R;
 import sdccd.edu.laitinena7.Utils.Book;
 import sdccd.edu.laitinena7.Utils.MessageEnum;
+
+import static android.R.attr.path;
 
 
 public class BookViewFragment extends Fragment {
@@ -32,6 +41,7 @@ public class BookViewFragment extends Fragment {
     private ImageView imageView;
     private TextView textView;
     private Button chatButton;
+    private Button deleteButton;
 
 
     public BookViewFragment() {
@@ -76,7 +86,7 @@ public class BookViewFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
         View view = inflater.inflate(R.layout.fragment_book_view, container, false);
         /*
         * public Book (String id,
@@ -92,19 +102,26 @@ public class BookViewFragment extends Fragment {
         imageView = (ImageView)view.findViewById(R.id.imageViewBook);
         //we have the book image, let's set it
         imageView.setImageBitmap(book.getBitmap());
+        //get bitmap from local directory
+        Bitmap bitmap = getBitmapFromLocalDir();
+        if (bitmap != null) {
+            imageView.setImageBitmap(bitmap);
+        }
 
 
         textView = (TextView) view.findViewById(R.id.textViewBook);
-        textView.setText("Title: "      +    book.getName()      + "\n" +
-                         "Author: "     +    book.getAuthor()    + "\n" +
-                         "Year: "       +    book.getYear()      + "\n" +
-                         "Price: "      +"$"+book.getPrice()     + "\n" +
-                         "Owner Name: " +    book.getOwnerName() + "\n" +
-                         "Owner Location: "+ book.getOwnerLocation() + "\n"
-                        );
+        String text = "Title: "      +    book.getName()      + "\n" +
+                "Author: "     +    book.getAuthor()    + "\n" +
+                "Year: "       +    book.getYear()      + "\n" +
+                "Price: "      +"$"+book.getPrice()     + "\n" +
+                "Owner Name: " +    book.getOwnerName() + "\n" +
+                "Owner Location: "+ book.getOwnerLocation() + "\n";
+        textView.setText(text
+        );
 
 
-        //get button and attach listener
+        //get chat button and attach listener
+
         chatButton = (Button)view.findViewById(R.id.buttonBook);
         chatButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,6 +129,22 @@ public class BookViewFragment extends Fragment {
                 onButtonPressed(MessageEnum.CHAT, book);
             }
         });
+
+        //get delete button and attach listener, if user is owner
+
+        deleteButton = (Button)view.findViewById(R.id.buttonDelete);
+        if (book.getIsUserOwner() == true) {
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onButtonPressed(MessageEnum.DELETE_BOOK, book);
+                }
+            });
+        }
+        //else hide button
+        else {
+            deleteButton.setVisibility(View.GONE);
+        }
 
         return view;
     }
@@ -143,6 +176,21 @@ public class BookViewFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    private Bitmap getBitmapFromLocalDir() {
+        Bitmap b = null;
+
+            try {
+                File f=new File(Environment.getExternalStorageDirectory()+"/inpaint/", "temporaryPic.png");
+                b = BitmapFactory.decodeStream(new FileInputStream(f));
+                }
+            catch (FileNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+
+        return b;
     }
 
     /**

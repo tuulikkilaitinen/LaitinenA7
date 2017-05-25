@@ -21,6 +21,7 @@ public class Book implements Serializable {
     private String ownerLocation;
     private Uri    imagePath;
     private Bitmap bitmap;
+    private boolean isUserOwner;
 
     public Book () {}
 
@@ -33,7 +34,8 @@ public class Book implements Serializable {
                  String ownerName,
                  String ownerLocation,
                  Uri imagePath,
-                 Bitmap bitmap) {
+                 Bitmap bitmap,
+                 boolean isUserOwner) {
 
         this.id = id;
         this.name = name;
@@ -45,6 +47,7 @@ public class Book implements Serializable {
         this.ownerLocation = ownerLocation;
         this.imagePath = imagePath;
         this.bitmap = bitmap;
+        this.isUserOwner = isUserOwner;
     }
 
     public String getName() {
@@ -113,5 +116,13 @@ public class Book implements Serializable {
 
     public void setBitmap(Bitmap bitmap) {
         this.bitmap = bitmap;
+    }
+
+    public void setIsUserOwner(boolean isUserOwner) {
+        this.isUserOwner = isUserOwner;
+    }
+
+    public boolean getIsUserOwner() {
+        return isUserOwner;
     }
 }

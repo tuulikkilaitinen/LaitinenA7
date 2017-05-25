@@ -161,7 +161,8 @@ public class AddBookFragment extends Fragment {
                             null, //owndername null for now
                             null, //ownerlocation null for now
                             uri, //image uri as String
-                            bitmap
+                            bitmap,
+                            false //isUserOwner false for now
                     );
                     onButtonPressed(MessageEnum.ADD_BOOK, book);
 

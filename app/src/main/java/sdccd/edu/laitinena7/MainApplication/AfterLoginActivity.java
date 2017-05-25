@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,10 +16,14 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -316,9 +322,22 @@ public class AfterLoginActivity extends AppCompatActivity
             databaseHandler.getBookList();
         }
         else if (message == MessageEnum.IMAGE_DOWNLOADED) {
+            //get information if user is owner
+            if (user.getUserId().equals(((Book)result).getOwnerId())) {
+                //if ownder looking this book, set up isThisOwner value to true
+                ((Book)result).setIsUserOwner(true);
+            }
+            //else it is false
+            else {
+                ((Book)result).setIsUserOwner(false);
+            }
             //now open bookviewfragment
             startBookViewFragment((Book)result);
 
+
+        }
+        else if (message == MessageEnum.BOOK_DELETED) {
+            databaseHandler.getBookList();
         }
 
 
@@ -336,6 +355,7 @@ public class AfterLoginActivity extends AppCompatActivity
         status = StatusEnum.STARTED_BOOK_LIST;
         //set visible search from menu
         this.menu.findItem(R.id.menu_search).setVisible(true);
+        this.menu.findItem(R.id.add_book).setVisible(true);
 
         //open book view fragment
         //create bundle for fragment
@@ -431,12 +451,20 @@ public class AfterLoginActivity extends AppCompatActivity
 
         status = StatusEnum.STARTED_BOOK_VIEW;
         //hide search from menu
-        this.menu.findItem(R.id.menu_search).setVisible(false);
-        this.menu.findItem(R.id.add_book).setVisible(false);
+        if (this.menu != null) {
+            this.menu.findItem(R.id.menu_search).setVisible(false);
+            this.menu.findItem(R.id.add_book).setVisible(false);
+        }
 
         //open book view fragment
         //create bundle for fragment
         Bundle data = new Bundle();
+        Bitmap bitmap = book.getBitmap();
+        //save bitmap temporary
+        //saveBitmapLocally(bitmap);
+
+        //book.setBitmap(null); //TODO CHECK THIS
+
         data.putSerializable("Book", book);
         // Create new fragment and transaction
         BookViewFragment bookViewFragment = new BookViewFragment();
@@ -454,13 +482,31 @@ public class AfterLoginActivity extends AppCompatActivity
         transaction.commit();
     }
 
+    private void saveBitmapLocally(Bitmap bitmap) {
+
+        File f3=new File(Environment.getExternalStorageDirectory()+"/inpaint/");
+        if(!f3.exists())
+            f3.mkdirs();
+        OutputStream outStream = null;
+            File file = new File(Environment.getExternalStorageDirectory() + "/inpaint/"+"temporaryPic"+".png");
+        try {
+            outStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+            outStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void startAddBookFragment() {
 
         //dont' use now....
         //status = StatusEnum.STARTED_ADD_BOOK;
         //hide search from menu
-        this.menu.findItem(R.id.menu_search).setVisible(false);
-        this.menu.findItem(R.id.add_book).setVisible(false);
+        if (this.menu != null) {
+            this.menu.findItem(R.id.menu_search).setVisible(false);
+            this.menu.findItem(R.id.add_book).setVisible(false);
+        }
 
         // Create new fragment and transaction
         AddBookFragment addBookFragment = new AddBookFragment();
@@ -475,32 +521,9 @@ public class AfterLoginActivity extends AppCompatActivity
 
         // Commit the transaction
         transaction.commit();
+
     }
 
-    // gets a reference to the BookListFragment
-    private BookListFragment getBookListFragment() {
-
-        this.bookListFragment = (BookListFragment)
-                getFragmentManager().findFragmentById(R.id.bookListFragment);
-
-        //return (BookListFragment) getSupportFragmentManager().findFragmentById(
-               // R.id.fragment_book_list);
-        return this.bookListFragment;
-    }
-
-    private ChatMessageFragment getChatMessageFragment() {
-
-        ChatMessageFragment chatMessageFragment = (ChatMessageFragment)
-                getFragmentManager().findFragmentById(R.id.chatMessageRecyclerView);
-
-        //return (BookListFragment) getSupportFragmentManager().findFragmentById(
-        // R.id.fragment_book_list);
-        return chatMessageFragment;
-    }
-
-    private static String getFragmentName(int viewId, int id) {
-        return "android:switcher:" + viewId + ":" + id;
-    }
 
     @Override
     public void onFragmentInteraction(MessageEnum message, Object result) {
@@ -517,21 +540,24 @@ public class AfterLoginActivity extends AppCompatActivity
         else if (message == MessageEnum.GET_BOOK_IMAGE) {
             databaseHandler.getBookImage((Book)result);
         }
-        else {
+        else if (message == MessageEnum.CHAT){
 
-        //if buyer, open chat view with owner
-        //TODO else if owner, open chat view list with list of buyers
-        if (!((Book)result).getOwnerId().equals(user.getUserId())) {
+            //if buyer, open chat view with owner
+            //TODO else if owner, open chat view list with list of buyers
+            if (!((Book)result).getOwnerId().equals(user.getUserId())) {
 
-            //so not owner, open chat view
-            //actually first get previous messages from Firebase database
-            //regarding this bookid
-            databaseHandler.getBookMessages((Book)result, this.user);
-        }
-        else {
+                //so not owner, open chat view
+                //actually first get previous messages from Firebase database
+                //regarding this bookid
+                databaseHandler.getBookMessages((Book)result, this.user);
+            }
+         else {
             //TODO open with list of buyers.....
             databaseHandler.getBookMessages((Book)result, this.user);
+            }
         }
+        else if (message == MessageEnum.DELETE_BOOK) {
+            databaseHandler.deleteBook ((Book)result);
         }
 
     }
@@ -546,7 +572,18 @@ public class AfterLoginActivity extends AppCompatActivity
         databaseHandler.sendMessageToDatabase((MyMessage)result);
         //message should come back with reference change?
     }
-    //public Object getBookList() {
-      //  return bookList;
-    //}
+    @Override
+    public void onBackPressed() {
+
+        int count = getFragmentManager().getBackStackEntryCount();
+        Log.i(TAG, this.status.toString());
+        if (count == 0) {
+            super.onBackPressed();
+            //additional code
+        } else {
+            getFragmentManager().popBackStack();
+        }
+
+    }
+
 }

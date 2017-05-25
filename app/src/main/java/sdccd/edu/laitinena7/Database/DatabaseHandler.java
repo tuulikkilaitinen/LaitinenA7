@@ -7,8 +7,10 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.UiThread;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -165,7 +167,8 @@ public class DatabaseHandler {
                             ds.child("ownername").getValue().toString(),
                             ds.child("ownerlocation").getValue().toString(),
                             null, //for image path now
-                            null //for bitmap for now
+                            null, //for bitmap for now
+                                    false //for isUserOwner
                     ));
 
                 }
@@ -179,6 +182,7 @@ public class DatabaseHandler {
             }
         });
     }
+
 
     public void getBookMessages(final Book book, User user) {
 
@@ -506,10 +510,19 @@ public class DatabaseHandler {
 
         //StorageReference imageRef = storageRef.child(getFileNameFromUri(book.getUri()));
         StorageReference imageRef = storageRef.child(book.getName()+".png");
+        String bookName = "picture";
 
         File localFile = null;
         try {
-            localFile = File.createTempFile(book.getName(), "png");
+
+            //java.lang.IllegalArgumentException: prefix must be at least 3 characters
+            if (book.getName().length() < 3) {
+                bookName = bookName + book.getName();
+            }
+            else {
+                bookName = book.getName();
+            }
+            localFile = File.createTempFile(bookName, "png");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -563,4 +576,28 @@ public class DatabaseHandler {
     }
 
 
+    public void deleteBook(Book book) {
+
+        final Book sentBook = book;
+
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        //https://laitinena7-55fef.firebaseio.com/
+        DatabaseReference myRef = database.getReference().child("books").child(
+                                    book.getId());
+
+        myRef.removeValue();
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.i(TAG, "deleteBook, onDataChange");
+                //send back book that was sent to database
+                sendMessage(MessageEnum.BOOK_DELETED, sentBook);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(TAG, databaseError.getMessage());
+            }
+        });
+    }
 } //end of class
